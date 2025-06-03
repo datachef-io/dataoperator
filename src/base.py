@@ -1,0 +1,155 @@
+import inspect
+from datetime import datetime
+
+
+METHODS_BY_OPERATOR_TYPE = {
+    'evaluate_condition': [
+        'greater_than',
+        'less_than',
+        'contains',
+        'not_contains',
+    ],
+    'merge_fields': [
+        'keep_max_value',
+        'keep_min_value',
+        'keep_newest_value',
+        'keep_oldest_value',
+        'preserve_priority'
+    ],
+    'select_master_record': [
+        'keep_record_with_max_value',
+        'keep_record_with_min_value',
+        'keep_record_with_newest_value',
+        'keep_record_with_oldest_value',
+        'keep_record_with_highest_priority'
+    ],
+}
+
+
+class BaseOperator:
+
+    def __init__(self, field_type: str, operator_type: str, **kwargs):
+        """
+
+        Acceptable kwargs:
+        - lod: list of dictionaries; each dictionary represents a "record"; e.g. [{"id": "a", "name": "joe"}, {"id": "b", "name": "jane"}]
+        - field: the field to apply the operator to; e.g. "name", "age", "numberofemployees"
+        - operator: the operator to apply; e.g. "contains", "greater_than", "max"
+        - datetime_field: the field to use for datetime comparison; e.g. "created_at"
+        - value: the value to compare against; e.g. "joe"
+
+        NOTE: Joins and aggregations should take place _before_ this step. In other words, tables should be joined and aggregations 
+        should be fed into `lod` with the aggregation as its own column. Then evaluation can take place as if these were any
+        regular column.
+        """
+
+        assert operator_type in list(METHODS_BY_OPERATOR_TYPE.keys()), f"Invalid operator_type: {operator_type}"
+        # assert field_type in list(OPERATOR_FUNCTIONS_BY_FIELD_TYPE.keys()), f"Invalid field_type: {field_type}"
+
+        self.field_type = field_type
+        self.operator_type = operator_type
+
+        self.lod = kwargs.get('lod')
+        self.field = kwargs.get('field')
+        self.operator = kwargs.get('operator') # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
+        self.datetime_field = kwargs.get("datetime_field")
+        self.value = kwargs.get("value")
+
+        if self.lod:
+            assert self.field, "Field is required when 'lod' is provided"
+            assert isinstance(self.lod, list)
+            assert all(isinstance(record, dict) for record in self.lod)
+            assert all(self.field in d for d in self.lod), f"Field '{self.field}' not found in all dictionaries"
+
+        if self.operator in ('KEEP_RECENT_VALUE', 'KEEP_OLDEST_VALUE'):
+            assert self.datetime_field, "datetime_field is required when using KEEP_RECENT_VALUE or KEEP_OLDEST_VALUE operator"
+
+    def get_methods(self):
+        return [
+            method_name for method_name, method in inspect.getmembers(self, predicate=inspect.isroutine) 
+            if not method_name.startswith("__")
+            and method_name not in ('execute', 'get_methods')
+            and method_name in OPERATOR_FUNCTIONS_BY_FIELD_TYPE[self.field_type]
+            and method_name in OPERATOR_FUNCTIONS_BY_OPERATOR_TYPE[self.operator_type]
+            ]
+
+    def execute(self):
+        return getattr(self, self.operator.lower())()
+
+    # shared or base components
+    def common_assert_number(self):
+        assert type(self.record[self.field]) in (int, float), "Field must be a number for condition operator"
+
+    def common_assert_lod(self):
+        assert self.lod, "lod is required for this method"
+
+    def greater_than(self):
+        self.common_assert_number()
+        return self.record[self.field] > self.value
+
+    def less_than(self):
+        self.common_assert_number()
+        return self.record[self.field] < self.value
+
+    def min_or_max(self, func: str):
+        self.common_assert_lod()
+        assert func in ("min", "max"), "func must be 'min' or 'max'"
+        return min(d[self.field] for d in self.lod) if func == "min" else max(d[self.field] for d in self.lod)
+
+    # Deduplication -> surviving record methods
+    def keep_record_with_max_value(self) -> list:
+        """
+        Among 2 or more records, return the record which has the maximum value for the given field.
+        """
+        self.common_assert_lod()
+        max_value = self.min_or_max("max")
+        records = [d for d in self.lod if d[self.field] == max_value]
+        return records
+
+    def keep_record_with_min_value(self) -> list:
+        self.common_assert_lod()
+        min_value = self.min_or_max("min")
+        records = [d for d in self.lod if d[self.field] == min_value]
+        return records
+
+    def keep_record_with_newest_value(self) -> list:
+        self.common_assert_lod()
+        assert self.datetime_field, "datetime_field is required for keep_record_with_newest_value"
+        
+        # Convert datetime strings to datetime objects for comparison
+        max_datetime = max(
+            datetime.fromisoformat(d[self.datetime_field]) 
+            for d in self.lod
+            if d[self.datetime_field] is not None
+        )
+        
+        # Find the record(s) that match max_datetime
+        records = [
+            d for d in self.lod 
+            if d[self.datetime_field] is not None 
+            and datetime.fromisoformat(d[self.datetime_field]) == max_datetime
+        ]
+        
+        return records
+
+    # Deduplication -> field merge methods
+    def keep_max_value(self) -> int:
+        return self.min_or_max("max")
+
+    def keep_min_value(self) -> int:
+        return self.min_or_max("min")
+
+    def concatenate_all_values(self) -> str:
+        self.common_assert_lod()
+        return "|".join(str(d[self.field]) for d in self.lod)
+
+    def keep_true_value(self) -> bool:
+        """ if any record has True for the given field, return True """
+        self.common_assert_lod()
+        return True if any(d[self.field] for d in self.lod) == True else None
+
+    def keep_false_value(self) -> bool:
+        """ if any record has False for the given field, return False """
+        self.common_assert_lod()
+        return False if any(d[self.field] for d in self.lod) == False else None
+        
