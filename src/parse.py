@@ -26,7 +26,7 @@ METHODS_BY_OPERATOR_TYPE = {
 }
 
 
-class BaseOperator:
+class Parse:
 
     def __init__(self, field_type: str, operator_type: str, **kwargs):
         """
