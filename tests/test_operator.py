@@ -1,14 +1,16 @@
 import unittest
 from datetime import datetime
-from src.base import BaseOperator, METHODS_BY_OPERATOR_TYPE
+from src.operator import DataOperator
 
 
-class TestBaseOperator(unittest.TestCase):
+cls = DataOperator
+
+class TestDataOperator(unittest.TestCase):
     
     def test_init_valid(self):
         """Test valid initialization of BaseOperator"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -24,7 +26,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_init_invalid_operator_type(self):
         """Test initialization with invalid operator_type"""
         with self.assertRaises(AssertionError):
-            BaseOperator(
+            cls(
                 field_type="number", 
                 operator_type="invalid_type", 
                 lod=[{"name": "John", "age": 30}], 
@@ -35,7 +37,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_init_invalid_lod_type(self):
         """Test initialization with invalid lod type"""
         with self.assertRaises(AssertionError):
-            BaseOperator(
+            cls(
                 field_type="number", 
                 operator_type="merge_fields", 
                 lod="not a list", 
@@ -46,7 +48,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_init_invalid_lod_elements(self):
         """Test initialization with invalid lod elements"""
         with self.assertRaises(AssertionError):
-            BaseOperator(
+            cls(
                 field_type="number", 
                 operator_type="merge_fields", 
                 lod=[1, 2, 3], 
@@ -57,7 +59,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_init_missing_field(self):
         """Test initialization with missing field in dictionaries"""
         with self.assertRaises(AssertionError):
-            BaseOperator(
+            cls(
                 field_type="number", 
                 operator_type="merge_fields", 
                 lod=[{"name": "John"}, {"name": "Jane"}], 
@@ -70,7 +72,7 @@ class TestBaseOperator(unittest.TestCase):
         lod = [{"name": "John", "age": 30, "created_at": "2023-01-01T12:00:00"}, 
                {"name": "Jane", "age": 25, "created_at": "2023-01-02T12:00:00"}]
         with self.assertRaises(AssertionError):
-            BaseOperator(
+            cls(
                 field_type="datetime", 
                 operator_type="merge_fields", 
                 lod=lod, 
@@ -81,7 +83,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_min_or_max_function(self):
         """Test min_or_max function with both min and max options"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -103,7 +105,7 @@ class TestBaseOperator(unittest.TestCase):
         """Test concatenate_all_values method"""
         # Test with string values
         lod = [{"name": "John"}, {"name": "Jane"}, {"name": "Bob"}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="string", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -115,7 +117,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with numeric values
         lod = [{"id": 1}, {"id": 2}, {"id": 3}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -127,7 +129,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with mixed values
         lod = [{"value": "abc"}, {"value": 123}, {"value": True}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="mixed", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -139,7 +141,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with empty list
         lod = []
-        operator = BaseOperator(
+        operator = cls(
             field_type="string", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -151,7 +153,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with single item
         lod = [{"name": "John"}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="string", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -164,7 +166,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_keep_max_value(self):
         """Test keep_max_value method"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -177,7 +179,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_keep_min_value(self):
         """Test keep_min_value method"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -190,7 +192,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_keep_record_with_max_value(self):
         """Test keep_record_with_max_value method"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="select_master_record", 
             lod=lod, 
@@ -205,7 +207,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with multiple records having the same max value
         lod = [{"name": "John", "age": 35}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="select_master_record", 
             lod=lod, 
@@ -221,7 +223,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_keep_record_with_min_value(self):
         """Test keep_record_with_min_value method"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="select_master_record", 
             lod=lod, 
@@ -241,7 +243,7 @@ class TestBaseOperator(unittest.TestCase):
             {"name": "Jane", "age": 25, "created_at": "2023-01-02T12:00:00"}, 
             {"name": "Bob", "age": 35, "created_at": "2023-01-03T12:00:00"}
         ]
-        operator = BaseOperator(
+        operator = cls(
             field_type="datetime", 
             operator_type="select_master_record", 
             lod=lod, 
@@ -256,7 +258,7 @@ class TestBaseOperator(unittest.TestCase):
         self.assertEqual(records[0]["created_at"], "2023-01-03T12:00:00")
         
         # Test with missing datetime_field
-        operator = BaseOperator(
+        operator = cls(
             field_type="datetime", 
             operator_type="select_master_record", 
             lod=lod, 
@@ -273,7 +275,7 @@ class TestBaseOperator(unittest.TestCase):
             {"name": "Jane", "age": 25, "created_at": "2023-01-02T12:00:00"}, 
             {"name": "Bob", "age": 35, "created_at": "2023-01-03T12:00:00"}
         ]
-        operator = BaseOperator(
+        operator = cls(
             field_type="datetime", 
             operator_type="select_master_record", 
             lod=lod, 
@@ -292,7 +294,7 @@ class TestBaseOperator(unittest.TestCase):
             {"name": "Jane", "age": 25, "created_at": "2023-01-02T12:00:00"}, 
             {"name": "Bob", "age": 35, "created_at": "2023-01-03T12:00:00"}
         ]
-        operator = BaseOperator(
+        operator = cls(
             field_type="datetime", 
             operator_type="select_master_record", 
             lod=lod, 
@@ -308,7 +310,7 @@ class TestBaseOperator(unittest.TestCase):
 
     def test_greater_than(self):
         """Test greater_than method"""
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="evaluate_condition", 
             field="age", 
@@ -331,7 +333,7 @@ class TestBaseOperator(unittest.TestCase):
 
     def test_less_than(self):
         """Test less_than method"""
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="evaluate_condition", 
             field="age", 
@@ -355,7 +357,7 @@ class TestBaseOperator(unittest.TestCase):
     def test_execute(self):
         """Test execute method"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="number", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -373,7 +375,7 @@ class TestBaseOperator(unittest.TestCase):
         """Test keep_true_value method"""
         # Test with all True values
         lod = [{"active": True}, {"active": True}, {"active": True}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -385,7 +387,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with mixed boolean values (some True, some False)
         lod = [{"active": False}, {"active": True}, {"active": False}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -397,7 +399,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with all False values
         lod = [{"active": False}, {"active": False}, {"active": False}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -409,7 +411,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with truthy/falsy values (not strictly boolean)
         lod = [{"status": 0}, {"status": ""}, {"status": 1}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="mixed", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -421,7 +423,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with all falsy values
         lod = [{"status": 0}, {"status": ""}, {"status": None}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="mixed", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -433,7 +435,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with empty list
         lod = []
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -447,7 +449,7 @@ class TestBaseOperator(unittest.TestCase):
         """Test keep_false_value method"""
         # Test with all False values
         lod = [{"active": False}, {"active": False}, {"active": False}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -459,7 +461,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with mixed boolean values (some True, some False)
         lod = [{"active": False}, {"active": True}, {"active": False}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -471,7 +473,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with all True values
         lod = [{"active": True}, {"active": True}, {"active": True}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -483,7 +485,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with truthy/falsy values (not strictly boolean)
         lod = [{"status": 0}, {"status": ""}, {"status": None}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="mixed", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -495,7 +497,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with mixed truthy/falsy values
         lod = [{"status": 0}, {"status": ""}, {"status": 1}]
-        operator = BaseOperator(
+        operator = cls(
             field_type="mixed", 
             operator_type="merge_fields", 
             lod=lod, 
@@ -507,7 +509,7 @@ class TestBaseOperator(unittest.TestCase):
         
         # Test with empty list
         lod = []
-        operator = BaseOperator(
+        operator = cls(
             field_type="boolean", 
             operator_type="merge_fields", 
             lod=lod, 
