@@ -8,26 +8,32 @@ This README file was written with AI so it may not be 100% accurate. Please refe
 
 ``` TODO ```
 
-## Usage
+## General Usage
 
-### Get All Available Methods
+### Initialize DataOperator
+
+`field_type` and `operator_type` are required. Other parameters are optional.
 
 ```python
 from src.operator import DataOperator
 
-operator = DataOperator()
-
-print(operator.get_available_methods())
+operator = DataOperator(
+    field_type="string", 
+    operator_type="merge_fields", 
+)
 ```
 
-### Get Available Methods for a Specific Operator Type
+### Get Available Methods
 
 ```python
 from src.operator import DataOperator
 
-operator = DataOperator()
+operator = DataOperator(
+    field_type="string", 
+    operator_type="merge_fields", 
+)
 
-methods = operator.get_available_methods("merge_fields")
+methods = operator.get_available_methods()
 
 print(methods)
 >>> ["concatenate_all_values", "keep_max_value", "keep_min_value", "keep_recent_value", "keep_oldest_value", "keep_corporate_domains", "preserve_priority"]
