@@ -1,8 +1,10 @@
-# DataOperator
+# Overview
 
-DataOperator is a base level class for Datachef record processing. It includes methods for parsing one or more records and determining the final value for a given field based on the operator.
+`DataOperator` is a base class for dictionary processing. It provides the following functionality:
 
-This README file was written with AI so it may not be 100% accurate. Please refer to the source code for the most up to date information.
+- returning a list of methods for a given field type and operator type
+- determining a "surviving" dictionary based on an evaluation method (e.g. "keep_record_with_max_value")
+- executing a method on a list of dictionaries (the dictionaries all must have the same keys) and determining the final value for a given field based on the method. (e.g. "concatenate_all_values")
 
 ## Installation
 
@@ -19,7 +21,7 @@ from src.operator import DataOperator
 
 operator = DataOperator(
     field_type="string", 
-    operator_type="merge_fields", 
+    operator_type="merge_values", 
 )
 ```
 
@@ -30,10 +32,10 @@ from src.operator import DataOperator
 
 operator = DataOperator(
     field_type="string", 
-    operator_type="merge_fields", 
+    operator_type="merge_values", 
 )
 
-methods = operator.get_available_methods()
+methods = operator.get_methods()
 
 print(methods)
 >>> ["concatenate_all_values", "keep_max_value", "keep_min_value", "keep_recent_value", "keep_oldest_value", "keep_corporate_domains", "preserve_priority"]
@@ -46,7 +48,7 @@ from src.operator import DataOperator
 
 operator = DataOperator(
     field_type="string", 
-    operator_type="merge_fields", 
+    operator_type="merge_values", 
     lod=[{"name": "John"}, {"name": "Jane"}, {"name": "Bob"}], 
     field="name", 
     operator="concatenate_all_values"

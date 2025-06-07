@@ -9,12 +9,13 @@ METHODS_BY_OPERATOR_TYPE = {
         'contains',
         'not_contains',
     ],
-    'merge_fields': [
+    'merge_values': [
         'keep_max_value',
         'keep_min_value',
         'keep_newest_value',
         'keep_oldest_value',
-        'preserve_priority'
+        'preserve_priority',
+        'concatenate_all_values',
     ],
     'select_master_record': [
         'keep_record_with_max_value',
@@ -22,6 +23,37 @@ METHODS_BY_OPERATOR_TYPE = {
         'keep_record_with_newest_value',
         'keep_record_with_oldest_value',
         'keep_record_with_highest_priority'
+    ],
+}
+
+METHODS_BY_FIELD_TYPE = {
+    'string': [
+        'contains',
+        'not_contains',
+        'keep_newest_value',
+        'keep_oldest_value',
+        'preserve_priority',
+        'concatenate_all_values',
+        'keep_record_with_newest_value',
+        'keep_record_with_oldest_value',
+    ],
+    'number': [
+        'greater_than',
+        'less_than',
+        'keep_max_value',
+        'keep_min_value',
+        'keep_newest_value',
+        'keep_oldest_value',
+        'keep_record_with_max_value',
+        'keep_record_with_min_value',
+        'keep_record_with_newest_value',
+        'keep_record_with_oldest_value',
+    ],
+    'datetime': [
+        'keep_newest_value',
+        'keep_oldest_value',
+        'keep_record_with_newest_value',
+        'keep_record_with_oldest_value',
     ],
 }
 
@@ -44,7 +76,6 @@ class DataOperator:
         """
 
         assert operator_type in list(METHODS_BY_OPERATOR_TYPE.keys()), f"Invalid operator_type: {operator_type}"
-        # assert field_type in list(OPERATOR_FUNCTIONS_BY_FIELD_TYPE.keys()), f"Invalid field_type: {field_type}"
 
         self.field_type = field_type
         self.operator_type = operator_type
@@ -56,25 +87,31 @@ class DataOperator:
         self.value = kwargs.get("value")
 
         if self.lod:
-            assert self.field, "Field is required when 'lod' is provided"
+            assert self.field, "'field' is a required kwarg when 'lod' is provided"
             assert isinstance(self.lod, list)
             assert all(isinstance(record, dict) for record in self.lod)
             assert all(self.field in d for d in self.lod), f"Field '{self.field}' not found in all dictionaries"
 
         if self.operator in ('KEEP_RECENT_VALUE', 'KEEP_OLDEST_VALUE'):
-            assert self.datetime_field, "datetime_field is required when using KEEP_RECENT_VALUE or KEEP_OLDEST_VALUE operator"
+            assert self.datetime_field, "'datetime_field' is a required kwarg when using KEEP_RECENT_VALUE or KEEP_OLDEST_VALUE operator"
 
     def get_methods(self):
         return [
             method_name for method_name, method in inspect.getmembers(self, predicate=inspect.isroutine) 
             if not method_name.startswith("__")
             and method_name not in ('execute', 'get_methods')
-            and method_name in OPERATOR_FUNCTIONS_BY_FIELD_TYPE[self.field_type]
-            and method_name in OPERATOR_FUNCTIONS_BY_OPERATOR_TYPE[self.operator_type]
+            and method_name in METHODS_BY_OPERATOR_TYPE[self.operator_type]
+            and method_name in METHODS_BY_FIELD_TYPE[self.field_type]
             ]
 
     def execute(self):
-        return getattr(self, self.operator.lower())()
+        method = getattr(self, self.operator.lower())()
+        if method:
+            assert self.operator in METHODS_BY_OPERATOR_TYPE[self.operator_type]
+            assert self.operator in METHODS_BY_FIELD_TYPE[self.field_type]
+            method()
+        else:
+            raise ValueError(f"Invalid operator: {self.operator}")
 
     # shared or base components
     def common_assert_number(self):
