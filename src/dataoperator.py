@@ -107,8 +107,8 @@ class DataOperator:
     def execute(self):
         method = getattr(self, self.operator.lower())()
         if method:
-            assert self.operator in METHODS_BY_OPERATOR_TYPE[self.operator_type]
-            assert self.operator in METHODS_BY_FIELD_TYPE[self.field_type]
+            assert self.operator in METHODS_BY_OPERATOR_TYPE[self.operator_type], f"Invalid operator_type: {self.operator_type}"
+            assert self.operator in METHODS_BY_FIELD_TYPE[self.field_type], f"Invalid field_type: {self.field_type}"
             method()
         else:
             raise ValueError(f"Invalid operator: {self.operator}")
