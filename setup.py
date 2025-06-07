@@ -5,6 +5,7 @@ setup(
     version="0.1.0",
     description="",
     author="Joe Fusaro",
-    packages=find_packages(),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     python_requires=">=3.7",
 )
