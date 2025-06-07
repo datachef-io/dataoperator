@@ -1,6 +1,5 @@
 import unittest
-from datetime import datetime
-from src.operator import DataOperator
+from src.dataoperator.operator import DataOperator
 
 
 cls = DataOperator
@@ -12,7 +11,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]
         operator = cls(
             field_type="number", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="age", 
             operator="keep_max_value"
@@ -21,7 +20,7 @@ class TestDataOperator(unittest.TestCase):
         self.assertEqual(operator.field,    "age")
         self.assertEqual(operator.operator, "keep_max_value")
         self.assertEqual(operator.field_type, "number")
-        self.assertEqual(operator.operator_type, "merge_fields")
+        self.assertEqual(operator.operator_type, "merge_values")
 
     def test_init_invalid_operator_type(self):
         """Test initialization with invalid operator_type"""
@@ -39,7 +38,7 @@ class TestDataOperator(unittest.TestCase):
         with self.assertRaises(AssertionError):
             cls(
                 field_type="number", 
-                operator_type="merge_fields", 
+                operator_type="merge_values", 
                 lod="not a list", 
                 field="age", 
                 operator="keep_max_value"
@@ -50,7 +49,7 @@ class TestDataOperator(unittest.TestCase):
         with self.assertRaises(AssertionError):
             cls(
                 field_type="number", 
-                operator_type="merge_fields", 
+                operator_type="merge_values", 
                 lod=[1, 2, 3], 
                 field="age", 
                 operator="keep_max_value"
@@ -61,7 +60,7 @@ class TestDataOperator(unittest.TestCase):
         with self.assertRaises(AssertionError):
             cls(
                 field_type="number", 
-                operator_type="merge_fields", 
+                operator_type="merge_values", 
                 lod=[{"name": "John"}, {"name": "Jane"}], 
                 field="age", 
                 operator="keep_max_value"
@@ -74,7 +73,7 @@ class TestDataOperator(unittest.TestCase):
         with self.assertRaises(AssertionError):
             cls(
                 field_type="datetime", 
-                operator_type="merge_fields", 
+                operator_type="merge_values", 
                 lod=lod, 
                 field="name", 
                 operator="KEEP_RECENT_VALUE"
@@ -85,7 +84,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
         operator = cls(
             field_type="number", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="age", 
             operator="keep_max_value"
@@ -107,7 +106,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"name": "John"}, {"name": "Jane"}, {"name": "Bob"}]
         operator = cls(
             field_type="string", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="name", 
             operator="concatenate_all_values"
@@ -119,7 +118,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"id": 1}, {"id": 2}, {"id": 3}]
         operator = cls(
             field_type="number", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="id", 
             operator="concatenate_all_values"
@@ -131,7 +130,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"value": "abc"}, {"value": 123}, {"value": True}]
         operator = cls(
             field_type="mixed", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="value", 
             operator="concatenate_all_values"
@@ -143,7 +142,7 @@ class TestDataOperator(unittest.TestCase):
         lod = []
         operator = cls(
             field_type="string", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="name", 
             operator="concatenate_all_values"
@@ -155,7 +154,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"name": "John"}]
         operator = cls(
             field_type="string", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="name", 
             operator="concatenate_all_values"
@@ -168,7 +167,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
         operator = cls(
             field_type="number", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="age", 
             operator="keep_max_value"
@@ -181,7 +180,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
         operator = cls(
             field_type="number", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="age", 
             operator="keep_min_value"
@@ -359,7 +358,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
         operator = cls(
             field_type="number", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="age", 
             operator="keep_max_value"
@@ -377,7 +376,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"active": True}, {"active": True}, {"active": True}]
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_true_value"
@@ -389,7 +388,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"active": False}, {"active": True}, {"active": False}]
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_true_value"
@@ -401,7 +400,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"active": False}, {"active": False}, {"active": False}]
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_true_value"
@@ -413,7 +412,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"status": 0}, {"status": ""}, {"status": 1}]
         operator = cls(
             field_type="mixed", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="status", 
             operator="keep_true_value"
@@ -425,7 +424,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"status": 0}, {"status": ""}, {"status": None}]
         operator = cls(
             field_type="mixed", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="status", 
             operator="keep_true_value"
@@ -437,7 +436,7 @@ class TestDataOperator(unittest.TestCase):
         lod = []
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_true_value"
@@ -451,7 +450,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"active": False}, {"active": False}, {"active": False}]
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_false_value"
@@ -463,7 +462,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"active": False}, {"active": True}, {"active": False}]
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_false_value"
@@ -475,7 +474,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"active": True}, {"active": True}, {"active": True}]
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_false_value"
@@ -487,7 +486,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"status": 0}, {"status": ""}, {"status": None}]
         operator = cls(
             field_type="mixed", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="status", 
             operator="keep_false_value"
@@ -499,7 +498,7 @@ class TestDataOperator(unittest.TestCase):
         lod = [{"status": 0}, {"status": ""}, {"status": 1}]
         operator = cls(
             field_type="mixed", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="status", 
             operator="keep_false_value"
@@ -511,7 +510,7 @@ class TestDataOperator(unittest.TestCase):
         lod = []
         operator = cls(
             field_type="boolean", 
-            operator_type="merge_fields", 
+            operator_type="merge_values", 
             lod=lod, 
             field="active", 
             operator="keep_false_value"
