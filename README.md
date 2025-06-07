@@ -28,8 +28,6 @@ operator = DataOperator(
 ### Get Available Methods
 
 ```python
-from src.operator import DataOperator
-
 operator = DataOperator(
     field_type="string", 
     operator_type="merge_values", 
@@ -44,8 +42,6 @@ print(methods)
 ### Merge Fields
 
 ```python
-from src.operator import DataOperator
-
 operator = DataOperator(
     field_type="string", 
     operator_type="merge_values", 
@@ -63,8 +59,6 @@ print(result)
 ### Select Master Record
 
 ```python
-from src.operator import DataOperator
-
 operator = DataOperator(
     field_type="string", 
     operator_type="select_master_record", 
