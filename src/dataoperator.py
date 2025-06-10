@@ -10,6 +10,8 @@ METHODS_BY_OPERATOR_TYPE = {
         'not_contains',
     ],
     'merge_values': [
+        'keep_true_value',
+        'keep_false_value',
         'keep_max_value',
         'keep_min_value',
         'keep_newest_value',
@@ -27,6 +29,10 @@ METHODS_BY_OPERATOR_TYPE = {
 }
 
 METHODS_BY_FIELD_TYPE = {
+    'boolean': [
+        'keep_true_value',
+        'keep_false_value',
+    ],
     'string': [
         'contains',
         'not_contains',
@@ -75,7 +81,8 @@ class DataOperator:
         regular column.
         """
 
-        assert operator_type in list(METHODS_BY_OPERATOR_TYPE.keys()), f"Invalid operator_type: {operator_type}"
+        assert operator_type in list(METHODS_BY_OPERATOR_TYPE.keys()), f"Invalid operator_type: {operator_type}; must be one of {list(METHODS_BY_OPERATOR_TYPE.keys())}"
+        assert field_type in list(METHODS_BY_FIELD_TYPE.keys()), f"Invalid field_type: {field_type}; must be one of {list(METHODS_BY_FIELD_TYPE.keys())}"
 
         self.field_type = field_type
         self.operator_type = operator_type
@@ -92,6 +99,11 @@ class DataOperator:
             assert all(isinstance(record, dict) for record in self.lod)
             assert all(self.field in d for d in self.lod), f"Field '{self.field}' not found in all dictionaries"
 
+        if self.operator:
+            # assert self.field, "'field' is a required kwarg when 'operator' is provided"
+            assert self.operator in METHODS_BY_OPERATOR_TYPE[self.operator_type], f"Invalid operator: {self.operator}; must be one of {list(METHODS_BY_OPERATOR_TYPE[self.operator_type])}"
+            assert self.operator in METHODS_BY_FIELD_TYPE[self.field_type], f"Invalid operator: {self.operator}; must be one of {list(METHODS_BY_FIELD_TYPE[self.field_type])}"
+
         if self.operator in ('KEEP_RECENT_VALUE', 'KEEP_OLDEST_VALUE'):
             assert self.datetime_field, "'datetime_field' is a required kwarg when using KEEP_RECENT_VALUE or KEEP_OLDEST_VALUE operator"
 
@@ -105,13 +117,11 @@ class DataOperator:
             ]
 
     def execute(self):
-        method = getattr(self, self.operator.lower())()
-        if method:
-            assert self.operator in METHODS_BY_OPERATOR_TYPE[self.operator_type], f"Invalid operator_type: {self.operator_type}"
-            assert self.operator in METHODS_BY_FIELD_TYPE[self.field_type], f"Invalid field_type: {self.field_type}"
-            method()
-        else:
-            raise ValueError(f"Invalid operator: {self.operator}")
+        _method = getattr(self, self.operator.lower())
+        try:
+            return _method()
+        except Exception as e:
+            raise e
 
     # shared or base components
     def common_assert_number(self):
@@ -128,10 +138,16 @@ class DataOperator:
         self.common_assert_number()
         return self.record[self.field] < self.value
 
-    def min_or_max(self, func: str):
-        self.common_assert_lod()
-        assert func in ("min", "max"), "func must be 'min' or 'max'"
-        return min(d[self.field] for d in self.lod) if func == "min" else max(d[self.field] for d in self.lod)
+    def _min_value(self):
+        return min(d[self.field] for d in self.lod)
+
+    def _max_value(self):
+        return max(d[self.field] for d in self.lod)
+
+    # def min_or_max(self, func: str):
+    #     self.common_assert_lod()
+    #     assert func in ("min", "max"), "func must be 'min' or 'max'"
+    #     return min(d[self.field] for d in self.lod) if func == "min" else max(d[self.field] for d in self.lod)
 
     # Deduplication -> surviving record methods
     def keep_record_with_max_value(self) -> list:
@@ -139,13 +155,13 @@ class DataOperator:
         Among 2 or more records, return the record which has the maximum value for the given field.
         """
         self.common_assert_lod()
-        max_value = self.min_or_max("max")
+        max_value = self._max_value()
         records = [d for d in self.lod if d[self.field] == max_value]
         return records
 
     def keep_record_with_min_value(self) -> list:
         self.common_assert_lod()
-        min_value = self.min_or_max("min")
+        min_value = self._min_value()
         records = [d for d in self.lod if d[self.field] == min_value]
         return records
 
@@ -171,10 +187,10 @@ class DataOperator:
 
     # Deduplication -> field merge methods
     def keep_max_value(self) -> int:
-        return self.min_or_max("max")
+        return max(d[self.field] for d in self.lod)
 
     def keep_min_value(self) -> int:
-        return self.min_or_max("min")
+        return min(d[self.field] for d in self.lod)
 
     def concatenate_all_values(self) -> str:
         self.common_assert_lod()
