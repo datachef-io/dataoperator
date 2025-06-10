@@ -179,7 +179,7 @@ class DataOperator:
         records = [
             d for d in self.lod 
             if d[self.field] is not None 
-            and datetime.fromisoformat(d[self.datetime_field]) == max_datetime
+            and datetime.fromisoformat(d[self.field]) == max_datetime
         ]
         
         return records
