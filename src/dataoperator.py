@@ -185,6 +185,28 @@ class DataOperator:
         
         return records
 
+    def keep_record_with_oldest_value(self) -> list:
+        """ TODO FIXME - refactor so that oldest and newest can share code """
+
+        self.common_assert_lod()
+        assert self.datetime_field, "datetime_field is required for keep_record_with_oldest_value"
+        
+        # Convert datetime strings to datetime objects for comparison
+        min_datetime = min(
+            datetime.fromisoformat(d[self.datetime_field]) 
+            for d in self.lod
+            if d[self.datetime_field] is not None
+        )
+        
+        # Find the record(s) that match min_datetime
+        records = [
+            d for d in self.lod 
+            if d[self.datetime_field] is not None 
+            and datetime.fromisoformat(d[self.datetime_field]) == min_datetime
+        ]
+        
+        return records
+
     # Deduplication -> field merge methods
     def keep_max_value(self) -> int:
         return max(d[self.field] for d in self.lod)
