@@ -223,27 +223,14 @@ class TestDataOperator(unittest.TestCase):
             field_type="datetime", 
             operator_type="select_master_record", 
             lod=lod, 
-            field="age", 
+            field="created_at", 
             operator="keep_record_with_newest_value",
-            datetime_field="created_at"
         )
         
         records = operator.execute()
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["name"], "Bob")
         self.assertEqual(records[0]["created_at"], "2023-01-03T12:00:00")
-        
-        # Test with missing datetime_field
-        operator = DataOperator(
-            field_type="datetime", 
-            operator_type="select_master_record", 
-            lod=lod, 
-            field="age", 
-            operator="keep_record_with_newest_value"
-        )
-        
-        with self.assertRaises(AssertionError):
-            operator.keep_record_with_newest_value()
             
         # Test with None datetime values
         lod = [
@@ -255,12 +242,11 @@ class TestDataOperator(unittest.TestCase):
             field_type="datetime", 
             operator_type="select_master_record", 
             lod=lod, 
-            field="age", 
+            field="created_at", 
             operator="keep_record_with_newest_value",
-            datetime_field="created_at"
         )
         
-        records = operator.keep_record_with_newest_value()
+        records = operator.execute()
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["name"], "Bob")
         
@@ -274,12 +260,11 @@ class TestDataOperator(unittest.TestCase):
             field_type="datetime", 
             operator_type="select_master_record", 
             lod=lod, 
-            field="age", 
+            field="created_at", 
             operator="keep_record_with_newest_value",
-            datetime_field="created_at"
         )
         
-        records = operator.keep_record_with_newest_value()
+        records = operator.execute()
         self.assertEqual(len(records), 2)
         self.assertTrue(any(r["name"] == "John" for r in records))
         self.assertTrue(any(r["name"] == "Bob" for r in records))
@@ -495,6 +480,24 @@ class TestDataOperator(unittest.TestCase):
         
         self.assertRaises(AssertionError, operator.keep_false_value)
 
+    def test_keep_corporate_domain(self):
+        lod = [
+            {"id": "001", "email": "jose.conseco@gmail.com"},
+            # {"id": "002", "email": "jose.conseco@10minutemail.com"},
+            {"id": "004", "email": "jose.conseco@yahoo.com"},
+            {"id": "005", "email": "jose.conseco@example.org"},
+            {"id": "006", "email": "jose.conseco@mailinator.com"},
+            {"id": "007", "email": "jose.conseco@bigcorp.co"},
+        ]
+        operator = DataOperator(
+            field_type="string", 
+            lod=lod,
+            field="email",
+            operator_type="merge_values",
+            operator="keep_corporate_domain"
+        )
+        result = operator.execute()
+        assert result == "jose.conseco@example.org"
 
 if __name__ == '__main__':
     unittest.main()

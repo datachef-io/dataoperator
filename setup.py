@@ -7,5 +7,5 @@ setup(
     author="Joe Fusaro",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    python_requires=">=3.7",
+    python_requires=">=3.7"
 )

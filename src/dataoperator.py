@@ -1,6 +1,10 @@
 import inspect
 from datetime import datetime
 
+from .assets.free_email_domains import FREE_EMAIL_DOMAINS
+from .assets.disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
+
+
 
 METHODS_BY_OPERATOR_TYPE = {
     'evaluate_condition': [
@@ -18,6 +22,7 @@ METHODS_BY_OPERATOR_TYPE = {
         'keep_oldest_value',
         'preserve_priority',
         'concatenate_all_values',
+        'keep_corporate_domain',
     ],
     'select_master_record': [
         'keep_record_with_max_value',
@@ -42,6 +47,7 @@ METHODS_BY_FIELD_TYPE = {
         'concatenate_all_values',
         'keep_record_with_newest_value',
         'keep_record_with_oldest_value',
+        'keep_corporate_domain',
     ],
     'number': [
         'greater_than',
@@ -170,7 +176,7 @@ class DataOperator:
         
         # Convert datetime strings to datetime objects for comparison
         max_datetime = max(
-            datetime.fromisoformat(d[self.field]) 
+            datetime.fromisoformat( d[self.field] ) 
             for d in self.lod
             if d[self.field] is not None
         )
@@ -225,4 +231,17 @@ class DataOperator:
         """ if any record has False for the given field, return False """
         self.common_assert_lod()
         return False if any(d[self.field] for d in self.lod) == False else None
-        
+
+    def keep_corporate_domain(self) -> str:  
+        """ 
+        TODO FIXME - this will always return the first record's domain if there are multiple 
+        corporate domains; there should be some additional logic to handle cases where there
+        are multiple corporate domains (e.g. email validation, comparison with other fields in
+        the record, etc.)
+        """
+        self.common_assert_lod()
+        return [
+            d[self.field] for d in self.lod 
+            if d[self.field].split("@")[1] not in FREE_EMAIL_DOMAINS 
+            and d[self.field].split("@")[1] not in DISPOSABLE_EMAIL_DOMAINS
+            ][0]
