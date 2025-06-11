@@ -1,8 +1,8 @@
 import inspect
 from datetime import datetime
 
-from src.assets.free_email_domains import FREE_EMAIL_DOMAINS
-from src.assets.disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
+from .free_email_domains import FREE_EMAIL_DOMAINS
+from .disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
 
 
 
