@@ -1,8 +1,8 @@
 import inspect
 from datetime import datetime
 
-from .free_email_domains import FREE_EMAIL_DOMAINS
-from .disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
+from dataoperator.free_email_domains import FREE_EMAIL_DOMAINS
+from dataoperator.disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
 
 
 

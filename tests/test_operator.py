@@ -1,5 +1,5 @@
 import unittest
-from src.dataoperator import DataOperator
+from dataoperator import DataOperator
 
 
 class TestDataOperator(unittest.TestCase):
