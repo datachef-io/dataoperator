@@ -94,9 +94,9 @@ class DataOperator:
         self.operator_type = operator_type
 
         self.lod = kwargs.get('lod')
-        self.field = kwargs.get('field')
-        self.operator = kwargs.get('operator') # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
-        self.datetime_field = kwargs.get("datetime_field")
+        self.field = kwargs.get('field').lower()
+        self.operator = kwargs.get('operator').lower() # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
+        self.datetime_field = kwargs.get("datetime_field").lower()
         self.value = kwargs.get("value")
 
         if self.lod:
