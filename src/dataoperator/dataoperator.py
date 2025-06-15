@@ -96,7 +96,7 @@ class DataOperator:
         self.lod = kwargs.get('lod')
         self.field = kwargs.get('field').lower() if kwargs.get('field') else None
         self.operator = kwargs.get('operator').lower() if kwargs.get('operator') else None # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
-        self.datetime_field = kwargs.get("datetime_field").lower() if kwargs.get('datetime_field') else None
+        self.datetime_field = self._get_datetime_field(**kwargs)
         self.value = kwargs.get("value") if kwargs.get('value') else None
 
         if self.lod:
@@ -112,6 +112,16 @@ class DataOperator:
 
         if self.operator in ('KEEP_RECENT_VALUE', 'KEEP_OLDEST_VALUE'):
             assert self.datetime_field, "'datetime_field' is a required kwarg when using KEEP_RECENT_VALUE or KEEP_OLDEST_VALUE operator"
+
+    def _get_datetime_field(self, **kwargs):
+        if kwargs.get("datetime_field"):
+            return kwargs.get("datetime_field").lower()
+        elif "created_at" in self.lod[0]:
+            return "created_at"
+        elif "createdat" in self.lod[0]:
+            return "createdat"
+        else:
+            raise ValueError("No datetime field found")
 
     def get_methods(self):
         return [
@@ -207,6 +217,37 @@ class DataOperator:
         return records
 
     # Deduplication -> field merge methods
+    def keep_oldest_value(self) -> str:
+        self.common_assert_lod()
+        min_datetime = min(
+            datetime.fromisoformat(d[self.datetime_field]) 
+            for d in self.lod
+            if d[self.datetime_field] is not None
+        )
+        # get the record in lod that has the min_datetime
+        record = [
+            d for d in self.lod 
+            if d[self.datetime_field] is not None 
+            and datetime.fromisoformat(d[self.datetime_field]) == min_datetime
+        ][0]
+        return record[self.field]
+
+    def keep_newest_value(self) -> str:
+        self.common_assert_lod()
+        max_datetime = max(
+            datetime.fromisoformat(d[self.datetime_field]) 
+            for d in self.lod
+            if d[self.datetime_field] is not None
+        )
+        # get the record in lod that has the max_datetime
+        record = [
+            d for d in self.lod 
+            if d[self.datetime_field] is not None 
+            and datetime.fromisoformat(d[self.datetime_field]) == max_datetime
+        ][0]
+        return record[self.field]
+
+
     def keep_max_value(self) -> int:
         return max(d[self.field] for d in self.lod)
 
