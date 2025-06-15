@@ -20,6 +20,32 @@ class TestDataOperator(unittest.TestCase):
         self.assertEqual(operator.field_type, "number")
         self.assertEqual(operator.operator_type, "merge_values")
 
+    def test_init_with_all_fields(self):
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="Name",
+            operator="CONCATENATE_ALL_VALUES",
+            datetime_field="Created_At",
+            value="Joe",
+            lod=[{"name": "Joe"}]
+        )
+        assert op.field == "name"
+        assert op.operator == "concatenate_all_values"
+        assert op.datetime_field == "created_at"
+        assert op.value == "Joe"
+
+    def test_init_with_missing_kwargs(self):
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values"
+            # No field, operator, datetime_field, value, or lod
+        )
+        assert op.field is None
+        assert op.operator is None
+        assert op.datetime_field is None
+        assert op.value is None
+
     def test_init_invalid_operator_type(self):
         """Test initialization with invalid operator_type"""
         with self.assertRaises(AssertionError):

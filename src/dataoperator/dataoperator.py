@@ -94,10 +94,10 @@ class DataOperator:
         self.operator_type = operator_type
 
         self.lod = kwargs.get('lod')
-        self.field = kwargs.get('field').lower()
-        self.operator = kwargs.get('operator').lower() # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
-        self.datetime_field = kwargs.get("datetime_field").lower()
-        self.value = kwargs.get("value")
+        self.field = kwargs.get('field').lower() if kwargs.get('field') else None
+        self.operator = kwargs.get('operator').lower() if kwargs.get('operator') else None # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
+        self.datetime_field = kwargs.get("datetime_field").lower() if kwargs.get('datetime_field') else None
+        self.value = kwargs.get("value") if kwargs.get('value') else None
 
         if self.lod:
             assert self.field, "'field' is a required kwarg when 'lod' is provided"
@@ -149,11 +149,6 @@ class DataOperator:
 
     def _max_value(self):
         return max(d[self.field] for d in self.lod)
-
-    # def min_or_max(self, func: str):
-    #     self.common_assert_lod()
-    #     assert func in ("min", "max"), "func must be 'min' or 'max'"
-    #     return min(d[self.field] for d in self.lod) if func == "min" else max(d[self.field] for d in self.lod)
 
     # Deduplication -> surviving record methods
     def keep_record_with_max_value(self) -> list:
