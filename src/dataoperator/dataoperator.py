@@ -96,7 +96,7 @@ class DataOperator:
         self.lod = kwargs.get('lod')
         self.field = kwargs.get('field').lower() if kwargs.get('field') else None
         self.operator = kwargs.get('operator').lower() if kwargs.get('operator') else None # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
-        self.datetime_field = self._get_datetime_field(**kwargs)
+        self.datetime_field = kwargs.get('datetime_field').lower() if kwargs.get('datetime_field') else None
         self.value = kwargs.get("value") if kwargs.get('value') else None
 
         if self.lod:
@@ -110,12 +110,14 @@ class DataOperator:
             assert self.operator in METHODS_BY_OPERATOR_TYPE[self.operator_type], f"Invalid operator: {self.operator}; must be one of {list(METHODS_BY_OPERATOR_TYPE[self.operator_type])}"
             assert self.operator in METHODS_BY_FIELD_TYPE[self.field_type], f"Invalid operator: {self.operator}; must be one of {list(METHODS_BY_FIELD_TYPE[self.field_type])}"
 
-        if self.operator in ('KEEP_RECENT_VALUE', 'KEEP_OLDEST_VALUE'):
-            assert self.datetime_field, "'datetime_field' is a required kwarg when using KEEP_RECENT_VALUE or KEEP_OLDEST_VALUE operator"
+        # if self.operator in ('KEEP_RECENT_VALUE', 'KEEP_OLDEST_VALUE'):
+        #     assert self.datetime_field, "'datetime_field' is a required kwarg when using KEEP_RECENT_VALUE or KEEP_OLDEST_VALUE operator"
 
-    def _get_datetime_field(self, **kwargs):
-        if kwargs.get("datetime_field"):
-            return kwargs.get("datetime_field").lower()
+    def _get_created_datetime_field(self):
+        if self.datetime_field:
+            return self.datetime_field
+        elif "createddate" in self.lod[0]:
+            return "createddate"
         elif "created_at" in self.lod[0]:
             return "created_at"
         elif "createdat" in self.lod[0]:
@@ -219,31 +221,33 @@ class DataOperator:
     # Deduplication -> field merge methods
     def keep_oldest_value(self) -> str:
         self.common_assert_lod()
+        datetime_field = self._get_created_datetime_field()
         min_datetime = min(
-            datetime.fromisoformat(d[self.datetime_field]) 
+            datetime.fromisoformat(d[datetime_field]) 
             for d in self.lod
-            if d[self.datetime_field] is not None
+            if d[datetime_field] is not None
         )
         # get the record in lod that has the min_datetime
         record = [
             d for d in self.lod 
-            if d[self.datetime_field] is not None 
-            and datetime.fromisoformat(d[self.datetime_field]) == min_datetime
+            if d[datetime_field] is not None 
+            and datetime.fromisoformat(d[datetime_field]) == min_datetime
         ][0]
         return record[self.field]
 
     def keep_newest_value(self) -> str:
         self.common_assert_lod()
+        datetime_field = self._get_created_datetime_field()
         max_datetime = max(
-            datetime.fromisoformat(d[self.datetime_field]) 
+            datetime.fromisoformat(d[datetime_field]) 
             for d in self.lod
-            if d[self.datetime_field] is not None
+            if d[datetime_field] is not None
         )
         # get the record in lod that has the max_datetime
         record = [
-            d for d in self.lod 
-            if d[self.datetime_field] is not None 
-            and datetime.fromisoformat(d[self.datetime_field]) == max_datetime
+            d for d in self.lod
+            if d[datetime_field] is not None 
+            and datetime.fromisoformat(d[datetime_field]) == max_datetime
         ][0]
         return record[self.field]
 

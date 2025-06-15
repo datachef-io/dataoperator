@@ -165,6 +165,98 @@ class TestDataOperator(unittest.TestCase):
         
         self.assertEqual(operator.concatenate_all_values(), "John")
 
+    def test_keep_oldest_value_created_at(self):
+        lod = [
+            {"name": "Alice", "created_at": "2022-01-01T12:00:00"},
+            {"name": "Bob",   "created_at": "2021-01-01T12:00:00"},
+            {"name": "Carol", "created_at": "2023-01-01T12:00:00"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="name",
+            operator="keep_oldest_value",
+            datetime_field="created_at",
+            lod=lod
+        )
+        assert op.keep_oldest_value() == "Bob"
+
+    def test_keep_newest_value_created_at(self):
+        lod = [
+            {"name": "Alice", "created_at": "2022-01-01T12:00:00"},
+            {"name": "Bob",   "created_at": "2021-01-01T12:00:00"},
+            {"name": "Carol", "created_at": "2023-01-01T12:00:00"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="name",
+            operator="keep_newest_value",
+            datetime_field="created_at",
+            lod=lod
+        )
+        assert op.keep_newest_value() == "Carol"
+
+    def test_keep_oldest_value_specify_datetime_field(self):
+        lod = [
+            {"name": "Alice", "dt_x": "2022-01-01T12:00:00"},
+            {"name": "Bob",   "dt_x": "2021-01-01T12:00:00"},
+            {"name": "Carol", "dt_x": "2023-01-01T12:00:00"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="name",
+            operator="keep_oldest_value",
+            datetime_field="dt_x",
+            lod=lod
+        )
+        assert op.keep_oldest_value() == "Bob"
+
+    def test_keep_newest_value_specify_datetime_field(self):
+        lod = [
+            {"name": "Alice", "dt_x": "2022-01-01T12:00:00"},
+            {"name": "Bob",   "dt_x": "2021-01-01T12:00:00"},
+            {"name": "Carol", "dt_x": "2023-01-01T12:00:00"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="name",
+            operator="keep_newest_value",
+            datetime_field="dt_x",
+            lod=lod
+        )
+        assert op.keep_newest_value() == "Carol"
+
+    def test_keep_oldest_value_createddate_autodetect(self):
+        lod = [
+            {"name": "Alice", "createddate": "2022-01-01T12:00:00"},
+            {"name": "Bob",   "createddate": "2021-01-01T12:00:00"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="name",
+            operator="keep_oldest_value",
+            lod=lod
+        )
+        assert op.keep_oldest_value() == "Bob"
+
+    def test_keep_newest_value_createdat_autodetect(self):
+        lod = [
+            {"name": "Alice", "createdat": "2022-01-01T12:00:00"},
+            {"name": "Bob",   "createdat": "2023-01-01T12:00:00"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="name",
+            operator="keep_newest_value",
+            lod=lod
+        )
+        assert op.keep_newest_value() == "Bob"
+
     def test_keep_max_value(self):
         """Test keep_max_value method"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]
