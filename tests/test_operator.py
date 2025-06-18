@@ -598,6 +598,71 @@ class TestDataOperator(unittest.TestCase):
         
         self.assertRaises(AssertionError, operator.keep_false_value)
 
+    def test_preserve_priority_returns_first_match(self):
+        lod = [
+            {"status": "B"},
+            {"status": "C"},
+            {"status": "D"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="status",
+            operator="preserve_priority",
+            value=["A", "B", "C", "D"],
+            lod=lod
+        )
+        assert op.preserve_priority() == "B"
+
+    def test_preserve_priority_returns_none_if_no_match(self):
+        lod = [
+            {"status": "X"},
+            {"status": "Y"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="status",
+            operator="preserve_priority",
+            value=["A", "B", "C", "D"],
+            lod=lod
+        )
+        assert op.preserve_priority() is None
+
+    def test_preserve_priority_with_different_field(self):
+        lod = [
+            {"priority": "low"},
+            {"priority": "medium"},
+            {"priority": "high"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="priority",
+            operator="preserve_priority",
+            value=["high", "medium", "low"],
+            lod=lod
+        )
+        assert op.preserve_priority() == "high"
+
+    def test_preserve_priority_asserts_on_nonlist_value(self):
+        lod = [
+            {"status": "A"},
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="status",
+            operator="preserve_priority",
+            value="A",  # Not a list!
+            lod=lod
+        )
+        try:
+            op.preserve_priority()
+            assert False, "Should have raised AssertionError"
+        except AssertionError:
+            pass
+
     def test_keep_corporate_domain(self):
         lod = [
             {"id": "001", "email": "jose.conseco@gmail.com"},

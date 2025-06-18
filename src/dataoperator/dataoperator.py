@@ -251,7 +251,6 @@ class DataOperator:
         ][0]
         return record[self.field]
 
-
     def keep_max_value(self) -> int:
         return max(d[self.field] for d in self.lod)
 
@@ -271,6 +270,25 @@ class DataOperator:
         """ if any record has False for the given field, return False """
         self.common_assert_lod()
         return False if any(d[self.field] for d in self.lod) == False else None
+
+    def preserve_priority(self) -> str:
+        """
+        in this context, self.value must contain a list 
+        of values in the order of priority
+
+        e.g. ['A', 'B', 'C', 'D']
+        if any record has 'A' for the given field, return 'A'
+        if any record has 'B' for the given field, return 'B'
+        etc.
+        """
+        self.common_assert_lod()
+        assert type(self.value) == list
+
+        for value in self.value:
+            for record in self.lod:
+                if record[self.field] == value:
+                    return value
+        return None
 
     def keep_corporate_domain(self) -> str:  
         """ 
