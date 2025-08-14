@@ -8,6 +8,8 @@ from dataoperator.disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
 
 METHODS_BY_OPERATOR_TYPE = {
     'evaluate_condition': [
+        'equals',
+        'not_equals',
         'greater_than',
         'less_than',
         'contains',
@@ -25,6 +27,10 @@ METHODS_BY_OPERATOR_TYPE = {
         'keep_corporate_domain',
     ],
     'select_master_record': [
+        'equals',
+        'not_equals',
+        'contains',
+        'not_contains',
         'keep_record_with_max_value',
         'keep_record_with_min_value',
         'keep_record_with_newest_value',
@@ -34,11 +40,19 @@ METHODS_BY_OPERATOR_TYPE = {
 }
 
 METHODS_BY_FIELD_TYPE = {
+    'id': [
+        'equals',
+        'not_equals',
+        'contains',
+        'not_contains',
+    ],
     'boolean': [
         'keep_true_value',
         'keep_false_value',
     ],
     'string': [
+        'equals',
+        'not_equals',
         'contains',
         'not_contains',
         'keep_newest_value',
@@ -62,6 +76,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_record_with_oldest_value',
     ],
     'int': [
+        'equals',
+        'not_equals',
         'greater_than',
         'less_than',
         'keep_max_value',
