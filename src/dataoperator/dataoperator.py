@@ -89,8 +89,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'keep_record_with_max_value',
         'keep_record_with_min_value',
-        'keep_record_with_newest_value',
-        'keep_record_with_oldest_value',
+        # 'keep_record_with_newest_value',
+        # 'keep_record_with_oldest_value',
     ],
     'int': [
         'equals',
@@ -103,8 +103,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'keep_record_with_max_value',
         'keep_record_with_min_value',
-        'keep_record_with_newest_value',
-        'keep_record_with_oldest_value',
+        # 'keep_record_with_newest_value',
+        # 'keep_record_with_oldest_value',
     ],
     'number': [
         'greater_than',
@@ -115,14 +115,22 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'keep_record_with_max_value',
         'keep_record_with_min_value',
-        'keep_record_with_newest_value',
-        'keep_record_with_oldest_value',
+        # 'keep_record_with_newest_value',
+        # 'keep_record_with_oldest_value',
     ],
     'datetime': [
         'keep_newest_value',
         'keep_oldest_value',
         'keep_record_with_newest_value',
         'keep_record_with_oldest_value',
+    ],
+    'phone': [
+        'equals',
+        'not_equals',
+        'contains',
+        'not_contains',
+        'keep_newest_value',
+        'keep_oldest_value',
     ],
 }
 
