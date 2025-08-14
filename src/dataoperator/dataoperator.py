@@ -46,6 +46,10 @@ METHODS_BY_FIELD_TYPE = {
         'contains',
         'not_contains',
     ],
+    'reference': [
+        'equals',
+        'not_equals',
+    ],
     'boolean': [
         'keep_true_value',
         'keep_false_value',
