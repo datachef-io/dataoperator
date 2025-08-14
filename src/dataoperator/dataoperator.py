@@ -10,10 +10,10 @@ METHODS_BY_OPERATOR_TYPE = {
     'evaluate_condition': [
         'equals',
         'not_equals',
-        'greater_than',
-        'less_than',
         'contains',
         'not_contains',
+        'greater_than',
+        'less_than',
     ],
     'merge_values': [
         'keep_true_value',
@@ -58,9 +58,14 @@ METHODS_BY_FIELD_TYPE = {
         'keep_newest_value',
         'keep_oldest_value',
         'concatenate_all_values',
-        # 'keep_record_with_newest_value',
-        # 'keep_record_with_oldest_value',
         'keep_corporate_domain',
+    ],
+    'textarea': [
+        'contains',
+        'not_contains',
+        'keep_newest_value',
+        'keep_oldest_value',
+        'concatenate_all_values',
     ],
     'picklist': [
         'equals',
