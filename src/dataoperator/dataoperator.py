@@ -68,7 +68,16 @@ METHODS_BY_FIELD_TYPE = {
         'keep_newest_value',
         'keep_oldest_value',
         'concatenate_all_values',
+    ],
+    'email': [
+        'equals',
+        'not_equals',
+        'contains',
+        'not_contains',
+        'keep_newest_value',
+        'keep_oldest_value',
         'keep_corporate_domain',
+        # 'keep_valid_email',
     ],
     'textarea': [
         'contains',
