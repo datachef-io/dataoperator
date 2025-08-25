@@ -147,6 +147,12 @@ METHODS_BY_FIELD_TYPE = {
         # 'keep_record_with_newest_value',
         # 'keep_record_with_oldest_value',
     ],
+    'date': [
+        'keep_newest_value',
+        'keep_oldest_value',
+        'keep_record_with_newest_value',
+        'keep_record_with_oldest_value',
+    ],
     'datetime': [
         'keep_newest_value',
         'keep_oldest_value',
