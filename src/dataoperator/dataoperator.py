@@ -109,6 +109,19 @@ METHODS_BY_FIELD_TYPE = {
         # 'keep_record_with_newest_value',
         # 'keep_record_with_oldest_value',
     ],
+    # 'double' is synonymous with 'float'
+    'double': [ 
+        'greater_than',
+        'less_than',
+        'keep_max_value',
+        'keep_min_value',
+        'keep_newest_value',
+        'keep_oldest_value',
+        'keep_record_with_max_value',
+        'keep_record_with_min_value',
+        # 'keep_record_with_newest_value',
+        # 'keep_record_with_oldest_value',
+    ],
     'currency': [
         'greater_than',
         'less_than',
