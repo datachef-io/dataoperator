@@ -142,6 +142,7 @@ FIELD_TYPE_MAP = {
     'number': 'int',
     'double': 'int',
     'float': 'int',
+    'percent': 'int',
     'currency': 'int',
     'integer': 'int',
     'address': 'string',
