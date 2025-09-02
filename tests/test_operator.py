@@ -4,7 +4,7 @@ from dataoperator.dataoperator import DataOperator
 
 class TestDataOperator(unittest.TestCase):
     
-    def test_init_valid(self):
+    def test_init_valid_number_field_type(self):
         """Test valid initialization of BaseOperator"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]
         operator = DataOperator(
@@ -17,7 +17,26 @@ class TestDataOperator(unittest.TestCase):
         self.assertEqual(operator.lod, lod)
         self.assertEqual(operator.field,    "age")
         self.assertEqual(operator.operator, "keep_max_value")
-        self.assertEqual(operator.field_type, "number")
+        self.assertEqual(operator.field_type, "int") # mapped from "number"
+        self.assertEqual(operator.operator_type, "merge_values")
+
+    def test_init_valid_address_field_type(self):
+        """Test valid initialization of BaseOperator"""
+        lod = [
+            {"name": "John", "age": 30, "address": "1 Smith St"},
+            {"name": "Jane", "age": 25, "address": "2 Oak St"}
+        ]
+        operator = DataOperator(
+            field_type="address", 
+            operator_type="merge_values", 
+            lod=lod, 
+            field="address", 
+            operator="keep_newest_value"
+        )
+        self.assertEqual(operator.lod, lod)
+        self.assertEqual(operator.field,    "address")
+        self.assertEqual(operator.operator, "keep_newest_value")
+        self.assertEqual(operator.field_type, "string") # mapped from "address"
         self.assertEqual(operator.operator_type, "merge_values")
 
     def test_init_with_all_fields(self):
@@ -673,7 +692,7 @@ class TestDataOperator(unittest.TestCase):
             {"id": "007", "email": "jose.conseco@bigcorp.co"},
         ]
         operator = DataOperator(
-            field_type="string", 
+            field_type="email", 
             lod=lod,
             field="email",
             operator_type="merge_values",

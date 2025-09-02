@@ -4,8 +4,6 @@ from datetime import datetime
 from dataoperator.free_email_domains import FREE_EMAIL_DOMAINS
 from dataoperator.disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
 
-
-
 METHODS_BY_OPERATOR_TYPE = {
     'evaluate_condition': [
         'equals',
@@ -68,6 +66,7 @@ METHODS_BY_FIELD_TYPE = {
         'keep_newest_value',
         'keep_oldest_value',
         'concatenate_all_values',
+        'preserve_priority',
     ],
     'email': [
         'equals',
@@ -97,58 +96,9 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'preserve_priority',
     ],
-    'float': [
-        'greater_than',
-        'less_than',
-        'keep_max_value',
-        'keep_min_value',
-        'keep_newest_value',
-        'keep_oldest_value',
-        'keep_record_with_max_value',
-        'keep_record_with_min_value',
-        # 'keep_record_with_newest_value',
-        # 'keep_record_with_oldest_value',
-    ],
-    # 'double' is synonymous with 'float'
-    'double': [ 
-        'greater_than',
-        'less_than',
-        'keep_max_value',
-        'keep_min_value',
-        'keep_newest_value',
-        'keep_oldest_value',
-        'keep_record_with_max_value',
-        'keep_record_with_min_value',
-        # 'keep_record_with_newest_value',
-        # 'keep_record_with_oldest_value',
-    ],
-    'currency': [
-        'greater_than',
-        'less_than',
-        'keep_max_value',
-        'keep_min_value',
-        'keep_newest_value',
-        'keep_oldest_value',
-        'keep_record_with_max_value',
-        'keep_record_with_min_value',
-        # 'keep_record_with_newest_value',
-        # 'keep_record_with_oldest_value',
-    ],
     'int': [
         'equals',
         'not_equals',
-        'greater_than',
-        'less_than',
-        'keep_max_value',
-        'keep_min_value',
-        'keep_newest_value',
-        'keep_oldest_value',
-        'keep_record_with_max_value',
-        'keep_record_with_min_value',
-        # 'keep_record_with_newest_value',
-        # 'keep_record_with_oldest_value',
-    ],
-    'number': [
         'greater_than',
         'less_than',
         'keep_max_value',
@@ -166,12 +116,6 @@ METHODS_BY_FIELD_TYPE = {
         'keep_record_with_newest_value',
         'keep_record_with_oldest_value',
     ],
-    'datetime': [
-        'keep_newest_value',
-        'keep_oldest_value',
-        'keep_record_with_newest_value',
-        'keep_record_with_oldest_value',
-    ],
     'phone': [
         'equals',
         'not_equals',
@@ -179,6 +123,7 @@ METHODS_BY_FIELD_TYPE = {
         'not_contains',
         'keep_newest_value',
         'keep_oldest_value',
+        # 'keep_valid_phone',
     ],
     'url': [
         'equals',
@@ -191,6 +136,16 @@ METHODS_BY_FIELD_TYPE = {
         # 'ends_with',
         # 'keep_valid_url',
     ],
+}
+
+FIELD_TYPE_MAP = {
+    'number': 'int',
+    'double': 'int',
+    'float': 'int',
+    'currency': 'int',
+    'integer': 'int',
+    'address': 'string',
+    'datetime': 'date',
 }
 
 
@@ -210,6 +165,9 @@ class DataOperator:
         should be fed into `lod` with the aggregation as its own column. Then evaluation can take place as if these were any
         regular column.
         """
+
+        if field_type not in METHODS_BY_FIELD_TYPE:
+            field_type = FIELD_TYPE_MAP.get(field_type, field_type)
 
         assert operator_type in list(METHODS_BY_OPERATOR_TYPE.keys()), f"Invalid operator_type: {operator_type}; must be one of {list(METHODS_BY_OPERATOR_TYPE.keys())}"
         assert field_type in list(METHODS_BY_FIELD_TYPE.keys()), f"Invalid field_type: {field_type}; must be one of {list(METHODS_BY_FIELD_TYPE.keys())}"
