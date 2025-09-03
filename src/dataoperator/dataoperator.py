@@ -85,6 +85,13 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'concatenate_all_values',
     ],
+    'multipicklist': [
+        'contains',
+        'not_contains',
+        'keep_newest_value',
+        'keep_oldest_value',
+        'concatenate_all_values',
+    ],
     'picklist': [
         'equals',
         'not_equals',
