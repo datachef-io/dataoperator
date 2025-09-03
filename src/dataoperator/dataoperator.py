@@ -153,6 +153,7 @@ FIELD_TYPE_MAP = {
     'currency': 'int',
     'integer': 'int',
     'address': 'string',
+    'combobox': 'string',
     'datetime': 'date',
 }
 
