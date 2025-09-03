@@ -1,4 +1,7 @@
 import inspect
+import re
+import urllib.request
+import urllib.error
 from datetime import datetime
 
 from dataoperator.free_email_domains import FREE_EMAIL_DOMAINS
@@ -25,6 +28,7 @@ METHODS_BY_OPERATOR_TYPE = {
         'preserve_priority',
         'concatenate_all_values',
         'keep_corporate_domain',
+        'keep_valid_url',
     ],
     'select_master_record': [
         'equals',
@@ -141,7 +145,7 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         # 'starts_with',
         # 'ends_with',
-        # 'keep_valid_url',
+        'keep_valid_url',
     ],
 }
 
@@ -393,3 +397,68 @@ class DataOperator:
             if d[self.field].split("@")[1] not in FREE_EMAIL_DOMAINS 
             and d[self.field].split("@")[1] not in DISPOSABLE_EMAIL_DOMAINS
             ][0]
+
+    def keep_valid_url(self) -> str:
+        """
+        Evaluate URL values and return the most valid one.
+        
+        Priority:
+        1. Valid format URLs that are not redirects
+        2. Valid format URLs that are redirects  
+        3. Disqualify malformed URLs
+        
+        Returns the best valid URL from the available options.
+        """
+        self.common_assert_lod()
+        
+        def is_valid_url_format(url: str) -> bool:
+            """Check if URL has valid format"""
+            if not url:
+                return False
+            
+            # Add protocol if missing for validation
+            test_url = url if url.startswith(('http://', 'https://')) else f'http://{url}'
+            
+            # Basic URL pattern: protocol + domain + optional path
+            url_pattern = re.compile(
+                r'^https?://(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(?:/.*)?$'
+            )
+            
+            return bool(url_pattern.match(test_url))
+        
+        def is_redirect(url: str) -> bool:
+            """Check if URL is a redirect by making a HEAD request"""
+            try:
+                if not url.startswith(('http://', 'https://')):
+                    url = f'http://{url}'
+                
+                # Create request with user agent to avoid bot blocking
+                request = urllib.request.Request(url, method='HEAD')
+                request.add_header('User-Agent', 'Mozilla/5.0 (compatible; URL-Validator/1.0)')
+                
+                with urllib.request.urlopen(request, timeout=10) as response:
+                    # Check if this is a redirect response
+                    return response.getcode() in (301, 302, 303, 307, 308)
+            except Exception:
+                # If we can't check (network error, timeout, etc.), assume it's not a redirect
+                # This ensures we don't exclude valid URLs due to network issues
+                return False
+        
+        valid_direct_urls = []
+        valid_redirect_urls = []
+        
+        for record in self.lod:
+            url = record[self.field]
+            if url and is_valid_url_format(url):
+                if is_redirect(url):
+                    valid_redirect_urls.append(url)
+                else:
+                    valid_direct_urls.append(url)
+        
+        # Return non-redirect URLs first, then redirect URLs
+        if valid_direct_urls:
+            return valid_direct_urls[0]
+        elif valid_redirect_urls:
+            return valid_redirect_urls[0]
+        else:
+            return None
