@@ -725,5 +725,80 @@ class TestDataOperator(unittest.TestCase):
         result = operator.execute()
         assert result == "jose.conseco@example.org"
 
+    def test_keep_valid_url_format_validation(self):
+        """Test keep_valid_url method with various URL formats"""
+        
+        # Test valid URL formats
+        lod = [
+            {"url": "google.com"},
+            {"url": "https://example.com"},
+            {"url": "sub.domain.org"}
+        ]
+        op = DataOperator(
+            field_type="url",
+            operator_type="merge_values",
+            field="url",
+            operator="keep_valid_url",
+            lod=lod
+        )
+        result = op.keep_valid_url()
+        self.assertIsNotNone(result)
+        
+    def test_keep_valid_url_invalid_format(self):
+        """Test keep_valid_url method rejects invalid URL formats"""
+        
+        # Test invalid URL formats
+        lod = [
+            {"url": "bankofamericacom"},  # Missing TLD separator
+            {"url": "invalid"},           # No TLD
+            {"url": ""},                  # Empty string
+        ]
+        op = DataOperator(
+            field_type="url",
+            operator_type="merge_values", 
+            field="url",
+            operator="keep_valid_url",
+            lod=lod
+        )
+        result = op.keep_valid_url()
+        self.assertIsNone(result)
+        
+    def test_keep_valid_url_mixed_valid_invalid(self):
+        """Test keep_valid_url method with mix of valid and invalid URLs"""
+        
+        # Mix of valid and invalid formats (like the issue example)
+        lod = [
+            {"url": "bankofamericacom"},  # Invalid - no TLD separator
+            {"url": "bankofamerica.com"}  # Valid
+        ]
+        op = DataOperator(
+            field_type="url", 
+            operator_type="merge_values",
+            field="url",
+            operator="keep_valid_url",
+            lod=lod
+        )
+        result = op.keep_valid_url()
+        self.assertEqual(result, "bankofamerica.com")
+        
+    def test_keep_valid_url_none_values(self):
+        """Test keep_valid_url method handles None values"""
+        
+        lod = [
+            {"url": None},
+            {"url": "example.com"},
+            {"url": None}
+        ]
+        op = DataOperator(
+            field_type="url",
+            operator_type="merge_values",
+            field="url", 
+            operator="keep_valid_url",
+            lod=lod
+        )
+        result = op.keep_valid_url()
+        self.assertEqual(result, "example.com")
+
+
 if __name__ == '__main__':
     unittest.main()
