@@ -248,10 +248,10 @@ class DataOperator:
         return self.record[self.field] < self.value
 
     def _min_value(self):
-        return min(d[self.field] for d in self.lod)
+        return min(d[self.field] for d in self.lod if d[self.field] not in ['', None])
 
     def _max_value(self):
-        return max(d[self.field] for d in self.lod)
+        return max(d[self.field] for d in self.lod if d[self.field] not in ['', None])
 
     # Deduplication -> surviving record methods
     def keep_record_with_max_value(self) -> list:
@@ -276,13 +276,13 @@ class DataOperator:
         max_datetime = max(
             datetime.fromisoformat( d[self.field] ) 
             for d in self.lod
-            if d[self.field] is not None
+            if d[self.field] not in ['', None]
         )
         
         # Find the record(s) that match max_datetime
         records = [
             d for d in self.lod 
-            if d[self.field] is not None 
+            if d[self.field] not in ['', None]
             and datetime.fromisoformat(d[self.field]) == max_datetime
         ]
         
@@ -297,13 +297,13 @@ class DataOperator:
         min_datetime = min(
             datetime.fromisoformat(d[self.field]) 
             for d in self.lod
-            if d[self.field] is not None
+            if d[self.field] not in ['', None]
         )
         
         # Find the record(s) that match min_datetime
         records = [
             d for d in self.lod 
-            if d[self.field] is not None 
+            if d[self.field] not in ['', None]
             and datetime.fromisoformat(d[self.field]) == min_datetime
         ]
         
@@ -321,7 +321,7 @@ class DataOperator:
         # get the record in lod that has the min_datetime
         record = [
             d for d in self.lod 
-            if d[datetime_field] is not None 
+            if d[datetime_field] not in ['', None]
             and datetime.fromisoformat(d[datetime_field]) == min_datetime
         ][0]
         return record[self.field]
@@ -332,21 +332,21 @@ class DataOperator:
         max_datetime = max(
             datetime.fromisoformat(d[datetime_field]) 
             for d in self.lod
-            if d[datetime_field] is not None
+            if d[datetime_field] not in ['', None]
         )
         # get the record in lod that has the max_datetime
         record = [
             d for d in self.lod
-            if d[datetime_field] is not None 
+            if d[datetime_field] not in ['', None]
             and datetime.fromisoformat(d[datetime_field]) == max_datetime
         ][0]
         return record[self.field]
 
     def keep_max_value(self) -> int:
-        return max(d[self.field] for d in self.lod)
+        return max(d[self.field] for d in self.lod if d[self.field] not in ['', None])
 
     def keep_min_value(self) -> int:
-        return min(d[self.field] for d in self.lod)
+        return min(d[self.field] for d in self.lod if d[self.field] not in ['', None])
 
     def concatenate_all_values(self) -> str:
         self.common_assert_lod()
