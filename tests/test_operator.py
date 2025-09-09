@@ -302,6 +302,19 @@ class TestDataOperator(unittest.TestCase):
         
         self.assertEqual(operator.keep_min_value(), 25)
 
+    def test_when_all_values_are_none(self):
+        """Test initialization when all values in the field are None"""
+        lod = [{"name": "John", "annualrevenue": None}, {"name": "Jane", "annualrevenue": None}]
+        operator = DataOperator(
+            field_type="currency", 
+            operator_type="merge_values", 
+            lod=lod, 
+            field="annualrevenue", 
+            operator="keep_max_value"
+        )
+        result = operator.execute()
+        self.assertEqual(result, None)
+
     def test_keep_record_with_max_value(self):
         """Test keep_record_with_max_value method"""
         lod = [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}, {"name": "Bob", "age": 35}]

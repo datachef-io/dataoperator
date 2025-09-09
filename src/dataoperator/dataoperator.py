@@ -239,6 +239,10 @@ class DataOperator:
     def common_assert_lod(self):
         assert self.lod, "lod is required for this method"
 
+    def at_least_one_value_in_lod_for_field(self):
+        self.common_assert_lod()
+        return True if any(d[self.field] not in ['', None] for d in self.lod) else False
+
     def greater_than(self):
         self.common_assert_number()
         return self.record[self.field] > self.value
@@ -248,10 +252,10 @@ class DataOperator:
         return self.record[self.field] < self.value
 
     def _min_value(self):
-        return min(d[self.field] for d in self.lod if d[self.field] not in ['', None])
+        return min(d[self.field] for d in self.lod)
 
     def _max_value(self):
-        return max(d[self.field] for d in self.lod if d[self.field] not in ['', None])
+        return max(d[self.field] for d in self.lod)
 
     # Deduplication -> surviving record methods
     def keep_record_with_max_value(self) -> list:
@@ -343,14 +347,17 @@ class DataOperator:
         return record[self.field]
 
     def keep_max_value(self) -> int:
-        return max(d[self.field] for d in self.lod if d[self.field] not in ['', None])
+        if self.at_least_one_value_in_lod_for_field():
+            return max(d[self.field] for d in self.lod if d[self.field] not in ['', None])
 
     def keep_min_value(self) -> int:
-        return min(d[self.field] for d in self.lod if d[self.field] not in ['', None])
+        if self.at_least_one_value_in_lod_for_field():
+            return min(d[self.field] for d in self.lod if d[self.field] not in ['', None])
 
     def concatenate_all_values(self) -> str:
         self.common_assert_lod()
-        return "|".join(str(d[self.field]) for d in self.lod)
+        if self.at_least_one_value_in_lod_for_field():
+            return "|".join(str(d[self.field]) for d in self.lod)
 
     def keep_true_value(self) -> bool:
         """ if any record has True for the given field, return True """
@@ -360,7 +367,8 @@ class DataOperator:
     def keep_false_value(self) -> bool:
         """ if any record has False for the given field, return False """
         self.common_assert_lod()
-        return False if any(d[self.field] for d in self.lod) == False else None
+        if self.at_least_one_value_in_lod_for_field():
+            return False if any(d[self.field] for d in self.lod) == False else None
 
     def preserve_priority(self) -> str:
         """
