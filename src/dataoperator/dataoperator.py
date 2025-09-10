@@ -348,11 +348,11 @@ class DataOperator:
 
     def keep_max_value(self) -> int:
         if self.at_least_one_value_in_lod_for_field():
-            return max(d[self.field] for d in self.lod if d[self.field] not in ['', None])
+            return max(d[self.field] for d in self.lod if isinstance(d[self.field], (int, float)))
 
     def keep_min_value(self) -> int:
         if self.at_least_one_value_in_lod_for_field():
-            return min(d[self.field] for d in self.lod if d[self.field] not in ['', None])
+            return min(d[self.field] for d in self.lod if isinstance(d[self.field], (int, float)))
 
     def concatenate_all_values(self) -> str:
         self.common_assert_lod()
@@ -362,13 +362,13 @@ class DataOperator:
     def keep_true_value(self) -> bool:
         """ if any record has True for the given field, return True """
         self.common_assert_lod()
-        return True if any(d[self.field] for d in self.lod) == True else None
+        return True if any(d[self.field] for d in self.lod if isinstance(d[self.field], (bool, int))) == True else None
 
     def keep_false_value(self) -> bool:
         """ if any record has False for the given field, return False """
         self.common_assert_lod()
         if self.at_least_one_value_in_lod_for_field():
-            return False if any(d[self.field] for d in self.lod) == False else None
+            return False if any(d[self.field] for d in self.lod if isinstance(d[self.field], (bool, int))) == False else None
 
     def preserve_priority(self) -> str:
         """

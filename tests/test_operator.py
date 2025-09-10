@@ -1,6 +1,52 @@
 import unittest
 from dataoperator.dataoperator import DataOperator
 
+REAL_LOD_A = [
+    {
+        'annualrevenue': '',
+        'billingcity': 'Auckland',
+        'billingcountry': 'New Zealand',
+        'billingpostalcode': '1010',
+        'billingstate': '', 
+        'billingstreet': '21 Industrial St', 
+        'createdbyid': '00544000009RQ1zAAG',
+        'createddate': '2019-02-07T02:11:42',
+        'description': 'Managed IT Services and IT Support for small businesses.', 
+        'id': '001440000244mnfAAA', 
+        'industry': '', 
+        'isdeleted': False, 
+        'lastmodifieddate': '2025-09-02T17:31:52', 
+        'name': 'QQQ Corp', 
+        'numberofemployees': '', 
+        'ownerid': '245', 
+        'phone': '', 
+        'systemmodstamp': '2025-09-02T17:31:52', 
+        'type': '', 
+        'website': 'www.qqq.com'
+    }, 
+    {
+        'annualrevenue': 5012438.0, 
+        'billingcity': 'NORCROSS', 
+        'billingcountry': 'United States', 
+        'billingpostalcode': '30092-3677', 
+        'billingstate': 'Georgia',
+        'billingstreet': '5875 INDUSTRIAL BLVD # 10', 
+        'createdbyid': '005E0000004xFZRIA2', 
+        'createddate': '2014-04-10T15:32:35', 
+        'description': 'Up and coming IT company.', 
+        'industry': 'Technology', 
+        'isdeleted': False, 
+        'lastmodifieddate': '2025-07-28T20:29:14', 
+        'name': 'QQQ Corporation', 
+        'numberofemployees': 25.0, 
+        'ownerid': '987', 
+        'phone': '+1.555.633.2551', 
+        'systemmodstamp': '2025-07-28T20:29:14', 
+        'type': 'Prospect', 
+        'website': 'https://qqq.com'
+    }
+]
+
 
 class TestDataOperator(unittest.TestCase):
     
@@ -302,9 +348,9 @@ class TestDataOperator(unittest.TestCase):
         
         self.assertEqual(operator.keep_min_value(), 25)
 
-    def test_when_all_values_are_none(self):
+    def test_keep_max_value_when_all_values_are_none(self):
         """Test initialization when all values in the field are None"""
-        lod = [{"name": "John", "annualrevenue": None}, {"name": "Jane", "annualrevenue": None}]
+        lod = [{"id": "001111", "annualrevenue": None}, {"id": "001222", "annualrevenue": ''}]
         operator = DataOperator(
             field_type="currency", 
             operator_type="merge_values", 
@@ -314,6 +360,19 @@ class TestDataOperator(unittest.TestCase):
         )
         result = operator.execute()
         self.assertEqual(result, None)
+
+    def test_keep_max_value_when_string_values_in_field(self):
+        """Test initialization when some values in the field are strings"""
+
+        operator = DataOperator(
+            field_type="currency", 
+            operator_type="merge_values", 
+            lod=REAL_LOD_A, 
+            field="annualrevenue", 
+            operator="keep_max_value"
+        )
+        result = operator.execute()
+        self.assertEqual(result, 5012438.0)
 
     def test_keep_record_with_max_value(self):
         """Test keep_record_with_max_value method"""
@@ -529,7 +588,6 @@ class TestDataOperator(unittest.TestCase):
             field="status", 
             operator="keep_true_value"
         )
-        
         self.assertTrue(operator.keep_true_value())
         
         # Test with all falsy values
