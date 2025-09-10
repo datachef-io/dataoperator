@@ -188,7 +188,7 @@ class DataOperator:
         self.field = kwargs.get('field').lower() if kwargs.get('field') else None
         self.operator = kwargs.get('operator').lower() if kwargs.get('operator') else None # e.g. "greater_than", "max", "keep_recent_value", "keep_oldest_value", "preserve_priority"
         self.datetime_field = kwargs.get('datetime_field').lower() if kwargs.get('datetime_field') else None
-        self.value = kwargs.get("value") if kwargs.get('value') else None
+        self.value = kwargs.get('value', None)
 
         if self.lod:
             assert self.field, "'field' is a required kwarg when 'lod' is provided"
