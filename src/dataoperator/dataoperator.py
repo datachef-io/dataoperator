@@ -239,6 +239,10 @@ class DataOperator:
     def common_assert_lod(self):
         assert self.lod, "lod is required for this method"
 
+    def at_least_one_value_in_lod_for_field(self):
+        self.common_assert_lod()
+        return True if any(d[self.field] not in ['', None] for d in self.lod) else False
+
     def greater_than(self):
         self.common_assert_number()
         return self.record[self.field] > self.value
@@ -276,13 +280,13 @@ class DataOperator:
         max_datetime = max(
             datetime.fromisoformat( d[self.field] ) 
             for d in self.lod
-            if d[self.field] is not None
+            if d[self.field] not in ['', None]
         )
         
         # Find the record(s) that match max_datetime
         records = [
             d for d in self.lod 
-            if d[self.field] is not None 
+            if d[self.field] not in ['', None]
             and datetime.fromisoformat(d[self.field]) == max_datetime
         ]
         
@@ -297,13 +301,13 @@ class DataOperator:
         min_datetime = min(
             datetime.fromisoformat(d[self.field]) 
             for d in self.lod
-            if d[self.field] is not None
+            if d[self.field] not in ['', None]
         )
         
         # Find the record(s) that match min_datetime
         records = [
             d for d in self.lod 
-            if d[self.field] is not None 
+            if d[self.field] not in ['', None]
             and datetime.fromisoformat(d[self.field]) == min_datetime
         ]
         
@@ -321,7 +325,7 @@ class DataOperator:
         # get the record in lod that has the min_datetime
         record = [
             d for d in self.lod 
-            if d[datetime_field] is not None 
+            if d[datetime_field] not in ['', None]
             and datetime.fromisoformat(d[datetime_field]) == min_datetime
         ][0]
         return record[self.field]
@@ -332,35 +336,39 @@ class DataOperator:
         max_datetime = max(
             datetime.fromisoformat(d[datetime_field]) 
             for d in self.lod
-            if d[datetime_field] is not None
+            if d[datetime_field] not in ['', None]
         )
         # get the record in lod that has the max_datetime
         record = [
             d for d in self.lod
-            if d[datetime_field] is not None 
+            if d[datetime_field] not in ['', None]
             and datetime.fromisoformat(d[datetime_field]) == max_datetime
         ][0]
         return record[self.field]
 
     def keep_max_value(self) -> int:
-        return max(d[self.field] for d in self.lod)
+        if self.at_least_one_value_in_lod_for_field():
+            return max(d[self.field] for d in self.lod if isinstance(d[self.field], (int, float)))
 
     def keep_min_value(self) -> int:
-        return min(d[self.field] for d in self.lod)
+        if self.at_least_one_value_in_lod_for_field():
+            return min(d[self.field] for d in self.lod if isinstance(d[self.field], (int, float)))
 
     def concatenate_all_values(self) -> str:
         self.common_assert_lod()
-        return "|".join(str(d[self.field]) for d in self.lod if d[self.field] is not None)
+        if self.at_least_one_value_in_lod_for_field():
+            return "|".join(str(d[self.field]) for d in self.lod)
 
     def keep_true_value(self) -> bool:
         """ if any record has True for the given field, return True """
         self.common_assert_lod()
-        return True if any(d[self.field] for d in self.lod) == True else None
+        return True if any(d[self.field] for d in self.lod if isinstance(d[self.field], (bool, int))) == True else None
 
     def keep_false_value(self) -> bool:
         """ if any record has False for the given field, return False """
         self.common_assert_lod()
-        return False if any(d[self.field] for d in self.lod) == False else None
+        if self.at_least_one_value_in_lod_for_field():
+            return False if any(d[self.field] for d in self.lod if isinstance(d[self.field], (bool, int))) == False else None
 
     def preserve_priority(self) -> str:
         """
