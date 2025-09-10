@@ -1,6 +1,7 @@
 import unittest
 from dataoperator.dataoperator import DataOperator
 
+# account
 REAL_LOD_A = [
     {
         'annualrevenue': '',
@@ -47,6 +48,62 @@ REAL_LOD_A = [
     }
 ]
 
+LEAD_LOD_EXAMPLE_01 = [
+    {
+        'annualrevenue': 2000.0,
+        'city': '',
+        'company': 'Accel AU',
+        'country': 'Australia', 
+        'createdbyid': '005E0000001Ja3DIAS', 
+        'createddate': '2022-08-19T23:43:52', 
+        'donotcall': False, 
+        'email': 'info@accellau.com.au.invalid', 
+        'firstname': 'Chris', 
+        'id': '00Q4W00001dqedcUAA', 
+        'isconverted': False, 
+        'isdeleted': False, 
+        'lastmodifiedbyid': '00544000009RLYjAAO', 
+        'lastmodifieddate': '2025-05-19T18:54:01', 
+        'lastname': 'Benson', 
+        'leadsource': 'List Purchase', 
+        'numberofemployees': '', 
+        'ownerid': '0054W00000FswzcQAB', 
+        'phone': '', 
+        'postalcode': '', 
+        'state': '', 
+        'status': 'Delete', 
+        'street': '', 
+        'systemmodstamp': '2025-05-19T18:54:01', 
+        'title': 'Executive Director'
+    }, 
+    {
+        'annualrevenue': 3127000.0,
+        'city': '',
+        'company': 'Accel AU Ltd', 
+        'country': 'Australia', 
+        'createdbyid': '005E0000001Ja3DIAS', 
+        'createddate': '2022-08-19T23:38:58', 
+        'donotcall': False, 
+        'email': 'info@accelau.com.invalid',
+        'firstname': 'Chris',
+        'id': '00Q4W00001dqecAUAQ',
+        'isconverted': False,
+        'isdeleted': False, 
+        'lastmodifiedbyid': '005We000006ahsbIAA', 
+        'lastmodifieddate': '2025-05-01T08:14:12', 
+        'lastname': 'Benson', 
+        'leadsource': 'List Purchase', 
+        'numberofemployees': '', 
+        'ownerid': '0052R000009GPBaQAO', 
+        'phone': '', 
+        'postalcode': '', 
+        'state': 'Queensland',
+        'status': 'Nurture', 
+        'street': '', 
+        'systemmodstamp': '2025-05-01T08:14:12', 
+        'title': 'Executive Director'
+    }
+]
 
 class TestDataOperator(unittest.TestCase):
     
@@ -750,6 +807,17 @@ class TestDataOperator(unittest.TestCase):
             assert False, "Should have raised AssertionError"
         except AssertionError:
             pass
+
+    def test_preserve_priority_on_real_test_lead_lod(self):
+        op = DataOperator(
+            field_type="string",
+            operator_type="merge_values",
+            field="status",
+            operator="preserve_priority",
+            value=["New", "Delete", "Nurture"],
+            lod=LEAD_LOD_EXAMPLE_01
+        )
+        assert op.preserve_priority() == "Delete"
 
     def test_keep_corporate_domain(self):
         lod = [
