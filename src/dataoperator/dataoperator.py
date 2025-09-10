@@ -48,10 +48,6 @@ METHODS_BY_FIELD_TYPE = {
         'contains',
         'not_contains',
     ],
-    'reference': [
-        'equals',
-        'not_equals',
-    ],
     'boolean': [
         'keep_true_value',
         'keep_false_value',
@@ -146,6 +142,7 @@ METHODS_BY_FIELD_TYPE = {
 }
 
 FIELD_TYPE_MAP = {
+    'reference': 'id',
     'number': 'int',
     'double': 'int',
     'float': 'int',
@@ -174,8 +171,11 @@ class DataOperator:
         should be fed into `lod` with the aggregation as its own column. Then evaluation can take place as if these were any
         regular column.
         """
-
-        if field_type not in METHODS_BY_FIELD_TYPE:
+        if field_type.lower() == 'id':
+            field_type = 'id'
+        elif field_type.lower() == 'email':
+            field_type = 'email'
+        elif field_type not in METHODS_BY_FIELD_TYPE:
             field_type = FIELD_TYPE_MAP.get(field_type, field_type)
 
         assert operator_type in list(METHODS_BY_OPERATOR_TYPE.keys()), f"Invalid operator_type: {operator_type}; must be one of {list(METHODS_BY_OPERATOR_TYPE.keys())}"
