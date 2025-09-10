@@ -229,6 +229,30 @@ class TestDataOperator(unittest.TestCase):
         )
         
         self.assertEqual(operator.concatenate_all_values(), "John")
+        
+        # Test with None values - should ignore None values
+        lod = [{"name": "John"}, {"name": None}, {"name": "Jane"}, {"name": None}, {"name": "Bob"}]
+        operator = DataOperator(
+            field_type="string", 
+            operator_type="merge_values", 
+            lod=lod, 
+            field="name", 
+            operator="concatenate_all_values"
+        )
+        
+        self.assertEqual(operator.concatenate_all_values(), "John|Jane|Bob")
+        
+        # Test with all None values - should return empty string
+        lod = [{"name": None}, {"name": None}, {"name": None}]
+        operator = DataOperator(
+            field_type="string", 
+            operator_type="merge_values", 
+            lod=lod, 
+            field="name", 
+            operator="concatenate_all_values"
+        )
+        
+        self.assertEqual(operator.concatenate_all_values(), "")
 
     def test_keep_oldest_value_created_at(self):
         lod = [
