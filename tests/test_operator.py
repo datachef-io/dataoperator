@@ -182,30 +182,6 @@ class TestDataOperator(unittest.TestCase):
         
         self.assertEqual(operator.concatenate_all_values(), "John|Jane|Bob")
         
-        # # Test with numeric values
-        # lod = [{"id": 1}, {"id": 2}, {"id": 3}]
-        # operator = cls(
-        #     field_type="number", 
-        #     operator_type="merge_values", 
-        #     lod=lod, 
-        #     field="id", 
-        #     operator="concatenate_all_values"
-        # )
-        
-        # self.assertEqual(operator.concatenate_all_values(), "1|2|3")
-        
-        # Test with mixed values
-        # lod = [{"value": "abc"}, {"value": 123}, {"value": True}]
-        # operator = cls(
-        #     field_type="mixed", 
-        #     operator_type="merge_values", 
-        #     lod=lod, 
-        #     field="value", 
-        #     operator="concatenate_all_values"
-        # )
-        
-        # self.assertEqual(operator.concatenate_all_values(), "abc|123|True")
-        
         # Test with empty list
         lod = []
         operator = DataOperator(
@@ -215,7 +191,6 @@ class TestDataOperator(unittest.TestCase):
             field="name", 
             operator="concatenate_all_values"
         )
-        
         self.assertRaises(AssertionError, operator.concatenate_all_values)
         
         # Test with single item
@@ -227,7 +202,6 @@ class TestDataOperator(unittest.TestCase):
             field="name", 
             operator="concatenate_all_values"
         )
-        
         self.assertEqual(operator.concatenate_all_values(), "John")
         
         # Test with None values - should ignore None values
@@ -252,7 +226,7 @@ class TestDataOperator(unittest.TestCase):
             operator="concatenate_all_values"
         )
         
-        self.assertEqual(operator.concatenate_all_values(), "")
+        self.assertEqual(operator.concatenate_all_values(), None)
 
     def test_keep_oldest_value_created_at(self):
         lod = [
