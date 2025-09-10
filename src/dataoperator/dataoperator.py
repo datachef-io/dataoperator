@@ -357,7 +357,7 @@ class DataOperator:
     def concatenate_all_values(self) -> str:
         self.common_assert_lod()
         if self.at_least_one_value_in_lod_for_field():
-            return "|".join(str(d[self.field]) for d in self.lod)
+            return "|".join(str(d[self.field]) for d in self.lod if d[self.field] not in ['', None])
 
     def keep_true_value(self) -> bool:
         """ if any record has True for the given field, return True """
