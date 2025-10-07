@@ -152,6 +152,7 @@ FIELD_TYPE_MAP = {
     'address': 'string',
     'combobox': 'string',
     'datetime': 'date',
+    'textarea': 'text',
 }
 
 
