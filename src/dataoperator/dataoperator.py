@@ -74,7 +74,7 @@ METHODS_BY_FIELD_TYPE = {
         'keep_corporate_domain',
         # 'keep_valid_email',
     ],
-    'textarea': [
+    'text': [
         'contains',
         'not_contains',
         'keep_newest_value',
