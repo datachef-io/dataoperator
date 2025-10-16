@@ -196,12 +196,16 @@ class DataOperator:
             assert isinstance(self.lod, list)
             assert all(isinstance(record, dict) for record in self.lod)
         
-        if self.lod and self.operator_type != 'update_field':
+        if self.lod and self.operator_type != "update_field":
             assert all(self.field in d for d in self.lod), f"Field '{self.field}' not found in all dictionaries"
             
-            # Evaluate condition operations should only work with single records
-            if self.operator_type == 'evaluate_condition':
-                assert len(self.lod) == 1, "evaluate_condition operations require exactly one record in lod"
+        # Evaluate condition operations should only work with single records
+        if self.lod and self.operator_type == "evaluate_condition":
+            assert len(self.lod) == 1, "evaluate_condition operations require exactly one record in lod"
+
+        if self.operator in ('set_true', 'set_false'):
+            assert self.field_type == "boolean", f"{self.operator} can only be used when field_type = boolean"
+            assert self.value is None, "value cannot be provided when using set_true or set_false operators"
 
         if self.operator:
             # assert self.field, "'field' is a required kwarg when 'operator' is provided"
@@ -222,6 +226,9 @@ class DataOperator:
             return "createdat"
         else:
             raise ValueError("No datetime field found")
+
+    def _convert_keys_to_lowercase(self, original_dict):
+        return dict((k.lower(), v) for k,v in original_dict.items())
 
     def get_methods(self):
         return [
@@ -302,7 +309,6 @@ class DataOperator:
             if self.field in item:
                 item[self.field] = False
         return self.lod
-
 
     # Deduplication -> surviving record methods
     def keep_record_with_max_value(self) -> list:

@@ -359,6 +359,38 @@ class TestDataOperator(unittest.TestCase):
         assert 'title' in lod[1].keys()
         assert lod[1]['title'] == 'No longer with company'
 
+    def test_update_field_set_true(self):
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'unsubscribed': 'True'},
+            {'id': '222', 'first_name': 'Dwight', 'unsubscribed': 'False'}
+        ]
+        op = DataOperator(
+            field_type="boolean",
+            operator_type="update_field",
+            lod=lod,
+            field="unsubscribed",
+            operator="set_true"
+        )
+        output = op.execute()
+        assert output[0]['unsubscribed'] == True
+        assert output[1]['unsubscribed'] == True
+
+    def test_update_field_set_false(self):
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'unsubscribed': 'True'},
+            {'id': '222', 'first_name': 'Dwight', 'unsubscribed': 'False'}
+        ]
+        op = DataOperator(
+            field_type="boolean",
+            operator_type="update_field",
+            lod=lod,
+            field="unsubscribed",
+            operator="set_false"
+        )
+        output = op.execute()
+        assert output[0]['unsubscribed'] == False
+        assert output[1]['unsubscribed'] == False
+
     def test_concatenate_all_values(self):
         """Test concatenate_all_values method"""
         # Test with string values
