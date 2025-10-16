@@ -291,11 +291,17 @@ class DataOperator:
 
     def set_true(self):
         assert self.field_type == 'boolean'
-        pass
+        for item in self.lod:
+            if self.field in item:
+                item[self.field] = True
+        return self.lod
 
     def set_false(self):
         assert self.field_type == 'boolean'
-        pass
+        for item in self.lod:
+            if self.field in item:
+                item[self.field] = False
+        return self.lod
 
 
     # Deduplication -> surviving record methods
