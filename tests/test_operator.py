@@ -225,6 +225,140 @@ class TestDataOperator(unittest.TestCase):
                 operator="KEEP_RECENT_VALUE"
             )
 
+    def test_get_methods_evaluate_conditions_string(self):
+        operator = DataOperator(
+            field_type="string",
+            operator_type="evaluate_condition"
+        )
+        returned_methods = operator.get_methods()
+        assert 'equals' in returned_methods
+        assert 'not_equals' in returned_methods
+        assert 'contains' in returned_methods
+        assert 'not_contains' in returned_methods
+
+    # Test get_methods returns expected values for combinations
+    # TODO FIXME - finish test coverage here...
+    def test_get_methods_merge_values_string(self):
+        operator = DataOperator(
+            field_type="string",
+            operator_type="merge_values"
+        )
+        returned_methods = operator.get_methods()
+        assert 'concatenate_all_values' in returned_methods
+        assert 'keep_newest_value' in returned_methods
+        assert 'keep_oldest_value' in returned_methods
+        assert 'preserve_priority' in returned_methods
+
+    def test_evaluate_conditions_init(self):
+        lod = [{'id': '111', 'first_name': 'Michael', 'last_name': 'Scott'}]
+        operator = DataOperator(
+            field_type="string",
+            operator_type="evaluate_condition",
+            lod=lod,
+            field="first_name",
+            operator="equals"
+        )
+        assert operator.field_type == "string"
+
+    def test_evaluate_conditions_invalid_init_two_lod(self):
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott'},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute'}
+        ]
+        with self.assertRaises(AssertionError):
+            DataOperator(
+                field_type="string", 
+                operator_type="evaluate_condition", 
+                lod=lod, 
+                field="first_name", 
+                operator="equals"
+            )
+
+    def test_evaluate_conditions_equals_true(self):
+        lod = [{'id': '111', 'first_name': 'Michael', 'last_name': 'Scott'}]
+        op = DataOperator(
+            field_type="string",
+            operator_type="evaluate_condition",
+            lod=lod,
+            field="last_name",
+            operator="equals",
+            value="Scott"
+        )
+        assert op.execute() == True
+
+    def test_evaluate_conditions_equals_false(self):
+        lod = [{'id': '111', 'first_name': 'Michael', 'last_name': 'Scott'}]
+        op = DataOperator(
+            field_type="string",
+            operator_type="evaluate_condition",
+            lod=lod,
+            field="last_name",
+            operator="equals",
+            value="Schrute"
+        )
+        assert op.execute() == False
+
+    def test_evaluate_conditions_contains_true(self):
+        lod = [{'id': '111', 'first_name': 'Michael', 'last_name': 'Scott'}]
+        op = DataOperator(
+            field_type="string",
+            operator_type="evaluate_condition",
+            lod=lod,
+            field="last_name",
+            operator="contains",
+            value="sco" # case insensitive test
+        )
+        assert op.execute() == True
+
+    def test_evaluate_conditions_contains_false(self):
+        lod = [{'id': '111', 'first_name': 'Michael', 'last_name': 'Scott'}]
+        op = DataOperator(
+            field_type="string",
+            operator_type="evaluate_condition",
+            lod=lod,
+            field="last_name",
+            operator="contains",
+            value="scarn"
+        )
+        assert op.execute() == False
+
+    def test_update_field_set_value_fields_exist_all(self):
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott', "title": "regional manager"},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', "title": "assistant to the regional manager"}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="title",
+            operator="set_string",
+            value="No longer with company"
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert output[0]['title'] == 'No longer with company'
+        assert output[1]['title'] == 'No longer with company'
+
+    def test_update_field_set_value_fields_exist_partial(self):
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott'},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', "title": "assistant to the regional manager"}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="title",
+            operator="set_string",
+            value="No longer with company"
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert 'title' not in lod[0].keys()
+        assert 'title' in lod[1].keys()
+        assert lod[1]['title'] == 'No longer with company'
+
     def test_concatenate_all_values(self):
         """Test concatenate_all_values method"""
         # Test with string values
@@ -237,7 +371,7 @@ class TestDataOperator(unittest.TestCase):
             operator="concatenate_all_values"
         )
         
-        self.assertEqual(operator.concatenate_all_values(), "John|Jane|Bob")
+        self.assertEqual(operator.execute(), "John|Jane|Bob")
         
         # Test with empty list
         lod = []
@@ -299,7 +433,7 @@ class TestDataOperator(unittest.TestCase):
             datetime_field="created_at",
             lod=lod
         )
-        assert op.keep_oldest_value() == "Bob"
+        assert op.execute() == "Bob"
 
     def test_keep_newest_value_created_at(self):
         lod = [
@@ -315,7 +449,7 @@ class TestDataOperator(unittest.TestCase):
             datetime_field="created_at",
             lod=lod
         )
-        assert op.keep_newest_value() == "Carol"
+        assert op.execute() == "Carol"
 
     def test_keep_oldest_value_specify_datetime_field(self):
         lod = [
@@ -331,7 +465,7 @@ class TestDataOperator(unittest.TestCase):
             datetime_field="dt_x",
             lod=lod
         )
-        assert op.keep_oldest_value() == "Bob"
+        assert op.execute() == "Bob"
 
     def test_keep_newest_value_specify_datetime_field(self):
         lod = [
@@ -347,7 +481,7 @@ class TestDataOperator(unittest.TestCase):
             datetime_field="dt_x",
             lod=lod
         )
-        assert op.keep_newest_value() == "Carol"
+        assert op.execute() == "Carol"
 
     def test_keep_oldest_value_createddate_autodetect(self):
         lod = [
@@ -361,7 +495,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_oldest_value",
             lod=lod
         )
-        assert op.keep_oldest_value() == "Bob"
+        assert op.execute() == "Bob"
 
     def test_keep_newest_value_createdat_autodetect(self):
         lod = [
@@ -375,7 +509,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_newest_value",
             lod=lod
         )
-        assert op.keep_newest_value() == "Bob"
+        assert op.execute() == "Bob"
 
     def test_keep_max_value(self):
         """Test keep_max_value method"""
@@ -388,7 +522,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_max_value"
         )
         
-        self.assertEqual(operator.keep_max_value(), 35)
+        self.assertEqual(operator.execute(), 35)
 
     def test_keep_min_value(self):
         """Test keep_min_value method"""
@@ -401,7 +535,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_min_value"
         )
         
-        self.assertEqual(operator.keep_min_value(), 25)
+        self.assertEqual(operator.execute(), 25)
 
     def test_keep_max_value_when_all_values_are_none(self):
         """Test initialization when all values in the field are None"""
@@ -426,8 +560,7 @@ class TestDataOperator(unittest.TestCase):
             field="annualrevenue", 
             operator="keep_max_value"
         )
-        result = operator.execute()
-        self.assertEqual(result, 5012438.0)
+        self.assertEqual(operator.execute(), 5012438.0)
 
     def test_keep_record_with_max_value(self):
         """Test keep_record_with_max_value method"""
@@ -440,7 +573,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_record_with_max_value"
         )
         
-        records = operator.keep_record_with_max_value()
+        records = operator.execute()
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["name"], "Bob")
         self.assertEqual(records[0]["age"], 35)
@@ -545,16 +678,16 @@ class TestDataOperator(unittest.TestCase):
         
         # Set up a record for testing
         operator.record = {"name": "John", "age": 30}
-        self.assertTrue(operator.greater_than())
+        self.assertTrue(operator.execute())
         
         # Test with value greater than field
         operator.value = 35
-        self.assertFalse(operator.greater_than())
+        self.assertFalse(operator.execute())
         
         # Test with non-numeric field
         operator.record = {"name": "John", "age": "thirty"}
         with self.assertRaises(AssertionError):
-            operator.greater_than()
+            operator.execute()
 
     def test_less_than(self):
         """Test less_than method"""
@@ -568,16 +701,16 @@ class TestDataOperator(unittest.TestCase):
         
         # Set up a record for testing
         operator.record = {"name": "John", "age": 30}
-        self.assertTrue(operator.less_than())
+        self.assertTrue(operator.execute())
         
         # Test with value less than field
         operator.value = 25
-        self.assertFalse(operator.less_than())
+        self.assertFalse(operator.execute())
         
         # Test with non-numeric field
         operator.record = {"name": "John", "age": "thirty"}
         with self.assertRaises(AssertionError):
-            operator.less_than()
+            operator.execute()
 
     def test_execute(self):
         """Test execute method"""
@@ -608,7 +741,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_true_value"
         )
         
-        self.assertTrue(operator.keep_true_value())
+        self.assertTrue(operator.execute())
         
         # Test with mixed boolean values (some True, some False)
         lod = [{"active": False}, {"active": True}, {"active": False}]
@@ -681,7 +814,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_false_value"
         )
         
-        self.assertFalse(operator.keep_false_value())
+        self.assertFalse(operator.execute())
         
         # Test with mixed boolean values (some True, some False)
         lod = [{"active": False}, {"active": True}, {"active": False}]
@@ -693,7 +826,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_false_value"
         )
         
-        self.assertFalse(operator.keep_false_value())
+        self.assertFalse(operator.execute())
         
         # Test with all True values
         lod = [{"active": True}, {"active": True}, {"active": True}]
@@ -705,7 +838,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_false_value"
         )
         
-        self.assertIsNone(operator.keep_false_value())
+        self.assertIsNone(operator.execute())
         
         # Test with truthy/falsy values (not strictly boolean)
         lod = [{"status": 0}, {"status": ""}, {"status": None}]
@@ -717,7 +850,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_false_value"
         )
         
-        self.assertFalse(operator.keep_false_value())
+        self.assertFalse(operator.execute())
         
         # Test with mixed truthy/falsy values
         lod = [{"status": 0}, {"status": ""}, {"status": 1}]
@@ -729,7 +862,7 @@ class TestDataOperator(unittest.TestCase):
             operator="keep_false_value"
         )
         
-        self.assertFalse(operator.keep_false_value())
+        self.assertFalse(operator.execute())
         
         # Test with empty list
         lod = []
@@ -757,7 +890,7 @@ class TestDataOperator(unittest.TestCase):
             value=["A", "B", "C", "D"],
             lod=lod
         )
-        assert op.preserve_priority() == "B"
+        assert op.execute() == "B"
 
     def test_preserve_priority_returns_none_if_no_match(self):
         lod = [
@@ -772,7 +905,7 @@ class TestDataOperator(unittest.TestCase):
             value=["A", "B", "C", "D"],
             lod=lod
         )
-        assert op.preserve_priority() is None
+        assert op.execute() is None
 
     def test_preserve_priority_with_different_field(self):
         lod = [
@@ -788,7 +921,7 @@ class TestDataOperator(unittest.TestCase):
             value=["high", "medium", "low"],
             lod=lod
         )
-        assert op.preserve_priority() == "high"
+        assert op.execute() == "high"
 
     def test_preserve_priority_asserts_on_nonlist_value(self):
         lod = [
@@ -803,7 +936,7 @@ class TestDataOperator(unittest.TestCase):
             lod=lod
         )
         try:
-            op.preserve_priority()
+            op.execute()
             assert False, "Should have raised AssertionError"
         except AssertionError:
             pass
@@ -817,7 +950,7 @@ class TestDataOperator(unittest.TestCase):
             value=["New", "Delete", "Nurture"],
             lod=LEAD_LOD_EXAMPLE_01
         )
-        assert op.preserve_priority() == "Delete"
+        assert op.execute() == "Delete"
 
     def test_keep_corporate_domain(self):
         lod = [
@@ -837,6 +970,8 @@ class TestDataOperator(unittest.TestCase):
         )
         result = operator.execute()
         assert result == "jose.conseco@example.org"
+
+
 
 if __name__ == '__main__':
     unittest.main()
