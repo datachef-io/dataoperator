@@ -9,11 +9,16 @@ METHODS_BY_OPERATOR_TYPE = {
         'equals',
         'not_equals',
         'contains',
-        # 'starts_with',
-        # 'ends_with',
         'not_contains',
         'greater_than',
         'less_than',
+    ],
+    'update_field': [
+        'set_string',
+        'set_true',
+        'set_false',
+        # 'increment',
+        # 'decrement',
     ],
     'merge_values': [
         'keep_true_value',
@@ -31,8 +36,6 @@ METHODS_BY_OPERATOR_TYPE = {
         'not_equals',
         'contains',
         'not_contains',
-        # 'starts_with',
-        # 'ends_with',
         'keep_record_with_max_value',
         'keep_record_with_min_value',
         'keep_record_with_newest_value',
@@ -51,18 +54,19 @@ METHODS_BY_FIELD_TYPE = {
     'boolean': [
         'keep_true_value',
         'keep_false_value',
+        'set_true',
+        'set_false',
     ],
     'string': [
         'equals',
         'not_equals',
         'contains',
         'not_contains',
-        # 'starts_with',
-        # 'ends_with',
         'keep_newest_value',
         'keep_oldest_value',
         'concatenate_all_values',
         'preserve_priority',
+        'set_string',
     ],
     'email': [
         'equals',
@@ -72,7 +76,7 @@ METHODS_BY_FIELD_TYPE = {
         'keep_newest_value',
         'keep_oldest_value',
         'keep_corporate_domain',
-        # 'keep_valid_email',
+        'set_string',
     ],
     'text': [
         'contains',
@@ -80,6 +84,7 @@ METHODS_BY_FIELD_TYPE = {
         'keep_newest_value',
         'keep_oldest_value',
         'concatenate_all_values',
+        'set_string',
     ],
     'multipicklist': [
         'contains',
@@ -93,15 +98,14 @@ METHODS_BY_FIELD_TYPE = {
         'not_equals',
         'contains',
         'not_contains',
-        # 'starts_with',
-        # 'ends_with',
         'keep_newest_value',
         'keep_oldest_value',
         'preserve_priority',
+        'set_string',
     ],
     'int': [
-        'equals',
-        'not_equals',
+        # 'equals',
+        # 'not_equals',
         'greater_than',
         'less_than',
         'keep_max_value',
@@ -110,8 +114,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'keep_record_with_max_value',
         'keep_record_with_min_value',
-        # 'keep_record_with_newest_value',
-        # 'keep_record_with_oldest_value',
+        # 'increment',
+        # 'decrement',
     ],
     'date': [
         'keep_newest_value',
@@ -126,7 +130,6 @@ METHODS_BY_FIELD_TYPE = {
         'not_contains',
         'keep_newest_value',
         'keep_oldest_value',
-        # 'keep_valid_phone',
     ],
     'url': [
         'equals',
@@ -135,9 +138,6 @@ METHODS_BY_FIELD_TYPE = {
         'not_contains',
         'keep_newest_value',
         'keep_oldest_value',
-        # 'starts_with',
-        # 'ends_with',
-        # 'keep_valid_url',
     ],
 }
 
@@ -195,7 +195,17 @@ class DataOperator:
             assert self.field, "'field' is a required kwarg when 'lod' is provided"
             assert isinstance(self.lod, list)
             assert all(isinstance(record, dict) for record in self.lod)
+        
+        if self.lod and self.operator_type != "update_field":
             assert all(self.field in d for d in self.lod), f"Field '{self.field}' not found in all dictionaries"
+            
+        # Evaluate condition operations should only work with single records
+        if self.lod and self.operator_type == "evaluate_condition":
+            assert len(self.lod) == 1, "evaluate_condition operations require exactly one record in lod"
+
+        if self.operator in ('set_true', 'set_false'):
+            assert self.field_type == "boolean", f"{self.operator} can only be used when field_type = boolean"
+            assert self.value is None, "value cannot be provided when using set_true or set_false operators"
 
         if self.operator:
             # assert self.field, "'field' is a required kwarg when 'operator' is provided"
@@ -216,6 +226,9 @@ class DataOperator:
             return "createdat"
         else:
             raise ValueError("No datetime field found")
+
+    def _convert_keys_to_lowercase(self, original_dict):
+        return dict((k.lower(), v) for k,v in original_dict.items())
 
     def get_methods(self):
         return [
@@ -257,6 +270,45 @@ class DataOperator:
 
     def _max_value(self):
         return max(d[self.field] for d in self.lod)
+
+    # Evaluate conditions
+    def equals(self) -> bool:
+        self.common_assert_lod()
+        return self.lod[0][self.field] == self.value
+
+    def not_equals(self) -> bool:
+        self.common_assert_lod()
+        return self.lod[0][self.field] != self.value
+
+    def contains(self) -> bool:
+        self.common_assert_lod()
+        return self.value.lower() in self.lod[0][self.field].lower()
+
+    def not_contains(self) -> bool:
+        self.common_assert_lod()
+        return self.value.lower() not in self.lod[0][self.field].lower()
+
+    # Set values
+    def set_string(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                item[self.field] = self.value
+        return self.lod
+
+    def set_true(self):
+        assert self.field_type == 'boolean'
+        for item in self.lod:
+            if self.field in item:
+                item[self.field] = True
+        return self.lod
+
+    def set_false(self):
+        assert self.field_type == 'boolean'
+        for item in self.lod:
+            if self.field in item:
+                item[self.field] = False
+        return self.lod
 
     # Deduplication -> surviving record methods
     def keep_record_with_max_value(self) -> list:
