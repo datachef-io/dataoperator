@@ -17,6 +17,8 @@ METHODS_BY_OPERATOR_TYPE = {
         'set_string',
         'set_true',
         'set_false',
+        'append_string',
+        'prepend_string',
         # 'increment',
         # 'decrement',
     ],
@@ -67,6 +69,8 @@ METHODS_BY_FIELD_TYPE = {
         'concatenate_all_values',
         'preserve_priority',
         'set_string',
+        'append_string',
+        'prepend_string',
     ],
     'email': [
         'equals',
@@ -294,6 +298,22 @@ class DataOperator:
         for item in self.lod:
             if self.field in item:
                 item[self.field] = self.value
+        return self.lod
+
+    def append_string(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                existing_value = item[self.field] or ""
+                item[self.field] = str(existing_value) + str(self.value)
+        return self.lod
+
+    def prepend_string(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                existing_value = item[self.field] or ""
+                item[self.field] = str(self.value) + str(existing_value)
         return self.lod
 
     def set_true(self):

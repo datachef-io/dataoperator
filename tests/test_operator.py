@@ -391,6 +391,120 @@ class TestDataOperator(unittest.TestCase):
         assert output[0]['unsubscribed'] == False
         assert output[1]['unsubscribed'] == False
 
+    def test_update_field_append_string(self):
+        """Test append_string method for update_field operations"""
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott', 'title': 'Regional Manager'},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', 'title': 'Assistant'}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="title",
+            operator="append_string",
+            value="(Sales)"
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert output[0]['title'] == 'Regional Manager(Sales)'
+        assert output[1]['title'] == 'Assistant(Sales)'
+
+    def test_update_field_append_string_with_none_values(self):
+        """Test append_string method when some fields have None values"""
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott', 'title': None},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', 'title': 'Assistant'}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="title",
+            operator="append_string",
+            value="(Sales)"
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert output[0]['title'] == '(Sales)'  # None becomes empty string
+        assert output[1]['title'] == 'Assistant(Sales)'
+
+    def test_update_field_append_string_with_empty_strings(self):
+        """Test append_string method when some fields have empty string values"""
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott', 'title': ''},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', 'title': 'Assistant'}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="title",
+            operator="append_string",
+            value="(Sales)"
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert output[0]['title'] == '(Sales)'  # Empty string + value
+        assert output[1]['title'] == 'Assistant(Sales)'
+
+    def test_update_field_prepend_string(self):
+        """Test prepend_string method for update_field operations"""
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott', 'email': 'mscott@dundermifflin.com'},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', 'email': 'dschrute@dundermifflin.com'}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="email",
+            operator="prepend_string",
+            value="invalid--"
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert output[0]['email'] == 'invalid--mscott@dundermifflin.com'
+        assert output[1]['email'] == 'invalid--dschrute@dundermifflin.com'
+
+    def test_update_field_prepend_string_with_none_values(self):
+        """Test prepend_string method when some fields have None values"""
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott', 'title': None},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', 'title': 'Assistant'}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="title",
+            operator="prepend_string",
+            value="No longer with company --"
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert output[0]['title'] == 'No longer with company --'  # None becomes empty string
+        assert output[1]['title'] == 'No longer with company --Assistant'
+
+    def test_update_field_prepend_string_with_empty_strings(self):
+        """Test prepend_string method when some fields have empty string values"""
+        lod = [
+            {'id': '111', 'first_name': 'Michael', 'last_name': 'Scott', 'title': ''},
+            {'id': '222', 'first_name': 'Dwight', 'last_name': 'Schrute', 'title': 'Assistant'}
+        ]
+        op = DataOperator(
+            field_type="string",
+            operator_type="update_field",
+            lod=lod,
+            field="title",
+            operator="prepend_string",
+            value="Senior "
+        )
+        output = op.execute()
+        assert isinstance(output, list)
+        assert output[0]['title'] == 'Senior '  # Empty string + value
+        assert output[1]['title'] == 'Senior Assistant'
+
     def test_concatenate_all_values(self):
         """Test concatenate_all_values method"""
         # Test with string values
