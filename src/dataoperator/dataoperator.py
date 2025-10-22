@@ -81,6 +81,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'keep_corporate_domain',
         'set_string',
+        'append_string',
+        'prepend_string',
     ],
     'text': [
         'contains',
