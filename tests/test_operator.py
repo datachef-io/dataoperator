@@ -1117,6 +1117,117 @@ class TestDataOperator(unittest.TestCase):
         result = operator.execute()
         assert result == "jose.conseco@example.org"
 
+    def test_match_condition_init_valid_string(self):
+        """Test valid initialization of match_condition with string field type"""
+        lod = [{'id': '111', 'email': 'test@example.com'}]
+        operator = DataOperator(
+            field_type="string",
+            operator_type="match_condition",
+            lod=lod,
+            field="email",
+            operator="matches"
+        )
+        self.assertEqual(operator.field_type, "string")
+        self.assertEqual(operator.operator_type, "match_condition")
+        self.assertEqual(operator.operator, "matches")
+
+    def test_match_condition_init_valid_id(self):
+        """Test valid initialization of match_condition with id field type"""
+        lod = [{'id': '001ABC123', 'name': 'John'}]
+        operator = DataOperator(
+            field_type="id",
+            operator_type="match_condition",
+            lod=lod,
+            field="id",
+            operator="matches"
+        )
+        self.assertEqual(operator.field_type, "id")
+        self.assertEqual(operator.operator_type, "match_condition")
+
+    def test_match_condition_init_valid_email(self):
+        """Test valid initialization of match_condition with email field type"""
+        lod = [{'email': 'test@example.com'}]
+        operator = DataOperator(
+            field_type="email",
+            operator_type="match_condition",
+            lod=lod,
+            field="email",
+            operator="matches"
+        )
+        self.assertEqual(operator.field_type, "email")
+        self.assertEqual(operator.operator_type, "match_condition")
+
+    def test_match_condition_init_valid_picklist(self):
+        """Test valid initialization of match_condition with picklist field type"""
+        lod = [{'status': 'Active'}]
+        operator = DataOperator(
+            field_type="picklist",
+            operator_type="match_condition",
+            lod=lod,
+            field="status",
+            operator="matches"
+        )
+        self.assertEqual(operator.field_type, "picklist")
+        self.assertEqual(operator.operator_type, "match_condition")
+
+    def test_match_condition_init_valid_phone(self):
+        """Test valid initialization of match_condition with phone field type"""
+        lod = [{'phone': '+1-555-123-4567'}]
+        operator = DataOperator(
+            field_type="phone",
+            operator_type="match_condition",
+            lod=lod,
+            field="phone",
+            operator="matches"
+        )
+        self.assertEqual(operator.field_type, "phone")
+        self.assertEqual(operator.operator_type, "match_condition")
+
+    def test_match_condition_init_valid_url(self):
+        """Test valid initialization of match_condition with url field type"""
+        lod = [{'website': 'https://example.com'}]
+        operator = DataOperator(
+            field_type="url",
+            operator_type="match_condition",
+            lod=lod,
+            field="website",
+            operator="matches"
+        )
+        self.assertEqual(operator.field_type, "url")
+        self.assertEqual(operator.operator_type, "match_condition")
+
+    def test_match_condition_invalid_field_type(self):
+        """Test that match_condition raises error for unsupported field types"""
+        lod = [{'value': True}]
+        with self.assertRaises(AssertionError):
+            DataOperator(
+                field_type="boolean",
+                operator_type="match_condition",
+                lod=lod,
+                field="value",
+                operator="matches"
+            )
+
+    def test_get_methods_match_condition_string(self):
+        """Test that match_condition operator type is valid for string field type"""
+        # Note: This test only verifies configuration, not that the matches method is implemented
+        operator = DataOperator(
+            field_type="string",
+            operator_type="match_condition"
+        )
+        # Verify the operator can be initialized with match_condition
+        self.assertEqual(operator.operator_type, "match_condition")
+
+    def test_get_methods_match_condition_email(self):
+        """Test that match_condition operator type is valid for email field type"""
+        # Note: This test only verifies configuration, not that the matches method is implemented
+        operator = DataOperator(
+            field_type="email",
+            operator_type="match_condition"
+        )
+        # Verify the operator can be initialized with match_condition
+        self.assertEqual(operator.operator_type, "match_condition")
+
 
 
 if __name__ == '__main__':

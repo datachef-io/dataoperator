@@ -44,6 +44,9 @@ METHODS_BY_OPERATOR_TYPE = {
         'keep_record_with_oldest_value',
         'keep_record_with_highest_priority'
     ],
+    'match_condition': [
+        'matches',
+    ],
 }
 
 METHODS_BY_FIELD_TYPE = {
@@ -52,6 +55,7 @@ METHODS_BY_FIELD_TYPE = {
         'not_equals',
         'contains',
         'not_contains',
+        'matches',
     ],
     'boolean': [
         'keep_true_value',
@@ -71,6 +75,7 @@ METHODS_BY_FIELD_TYPE = {
         'set_string',
         'append_string',
         'prepend_string',
+        'matches',
     ],
     'email': [
         'equals',
@@ -83,6 +88,7 @@ METHODS_BY_FIELD_TYPE = {
         'set_string',
         'append_string',
         'prepend_string',
+        'matches',
     ],
     'text': [
         'contains',
@@ -108,6 +114,7 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'preserve_priority',
         'set_string',
+        'matches',
     ],
     'int': [
         # 'equals',
@@ -136,6 +143,7 @@ METHODS_BY_FIELD_TYPE = {
         'not_contains',
         'keep_newest_value',
         'keep_oldest_value',
+        'matches',
     ],
     'url': [
         'equals',
@@ -144,6 +152,7 @@ METHODS_BY_FIELD_TYPE = {
         'not_contains',
         'keep_newest_value',
         'keep_oldest_value',
+        'matches',
     ],
 }
 
