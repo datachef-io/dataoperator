@@ -303,6 +303,12 @@ class DataOperator:
         self.common_assert_lod()
         return self.value.lower() not in self.lod[0][self.field].lower()
 
+    def matches(self):
+        """ 
+        This method is merely a placeholder, and must be implemented 
+        upstream """
+        raise NotImplementedError
+
     # Set values
     def set_string(self):
         self.common_assert_lod()
