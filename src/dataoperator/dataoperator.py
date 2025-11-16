@@ -47,6 +47,13 @@ METHODS_BY_OPERATOR_TYPE = {
     'match_condition': [
         'matches',
     ],
+    'format_value': [
+        'format_person_firstname',
+        'format_person_lastname',
+        'format_company_name',
+        'format_state_territory',
+        'format_country_iso2',
+    ],
 }
 
 METHODS_BY_FIELD_TYPE = {
@@ -76,6 +83,11 @@ METHODS_BY_FIELD_TYPE = {
         'append_string',
         'prepend_string',
         'matches',
+        'format_person_firstname',
+        'format_person_lastname',
+        'format_company_name',
+        'format_state_territory',
+        'format_country_iso2',
     ],
     'email': [
         'equals',
@@ -345,6 +357,46 @@ class DataOperator:
         for item in self.lod:
             if self.field in item:
                 item[self.field] = False
+        return self.lod
+
+    def format_person_firstname(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                # TODO FIXME - implement this
+                pass
+        return self.lod
+
+    def format_person_lastname(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                # TODO FIXME - implement this
+                pass
+        return self.lod
+
+    def format_company_name(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                # TODO FIXME - implement this
+                pass
+        return self.lod
+
+    def format_state_territory(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                # TODO FIXME - implement this
+                pass
+        return self.lod
+
+    def format_country_iso2(self):
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                # TODO FIXME - implement this
+                pass
         return self.lod
 
     # Deduplication -> surviving record methods
