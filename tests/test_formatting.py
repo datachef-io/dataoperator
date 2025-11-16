@@ -58,6 +58,18 @@ class TestFormattingMethods(unittest.TestCase):
         )
         result = op.execute()
         self.assertEqual(result[0]['firstname'], 'Jürgen')
+
+    def test_format_person_firstname_unicode_escape_umlaut2(self):
+        lod = [{'firstname': 'bjU+00F6rn'}]
+        op = DataOperator(
+            field_type="string",
+            operator_type="format_value",
+            lod=lod,
+            field="firstname",
+            operator="format_person_firstname"
+        )
+        result = op.execute()
+        self.assertEqual(result[0]['firstname'], 'Björn')
     
     def test_format_person_firstname_hyphenated(self):
         """Test hyphenated name conversion"""
