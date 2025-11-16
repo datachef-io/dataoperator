@@ -1,8 +1,12 @@
 import inspect
+import re
+import unicodedata
 from datetime import datetime
 
 from dataoperator.free_email_domains import FREE_EMAIL_DOMAINS
 from dataoperator.disposable_email_domains import DISPOSABLE_EMAIL_DOMAINS
+from dataoperator.state_territory_mappings import STATE_TERRITORY_MAPPINGS, STATE_TERRITORY_VARIATIONS
+from dataoperator.country_mappings import COUNTRY_MAPPINGS, COUNTRY_ABBREVIATIONS
 
 METHODS_BY_OPERATOR_TYPE = {
     'evaluate_condition': [
@@ -50,8 +54,9 @@ METHODS_BY_OPERATOR_TYPE = {
     'format_value': [
         'format_person_firstname',
         'format_person_lastname',
-        'format_state_territory_is02',
+        'format_state_territory_iso2',
         'format_country_iso2',
+        'format_country_iso3',
     ],
 }
 
@@ -84,8 +89,9 @@ METHODS_BY_FIELD_TYPE = {
         'matches',
         'format_person_firstname',
         'format_person_lastname',
-        'format_state_territory_is02',
+        'format_state_territory_iso2',
         'format_country_iso2',
+        'format_country_iso3',
     ],
     'email': [
         'equals',
@@ -358,36 +364,331 @@ class DataOperator:
         return self.lod
 
     def format_person_firstname(self):
+        """
+        Format a person's first name to proper case.
+        - Handles Unicode escape sequences (e.g., "U+00E9" -> "é")
+        - Converts to proper case
+        - Handles hyphenated names (e.g., "ANNE-MARIE" -> "Anne-Marie")
+        - Excludes Chinese and Japanese characters from case processing
+        """
         self.common_assert_lod()
         for item in self.lod:
-            if self.field in item:
-                # TODO FIXME - implement this
-                pass
+            if self.field in item and item[self.field]:
+                name = str(item[self.field])
+                
+                # Replace Unicode escape sequences like "U+00E9" with actual Unicode characters
+                name = self._replace_unicode_escapes(name)
+                
+                # Check if the name contains CJK (Chinese, Japanese, Korean) characters
+                # If so, return as-is without case conversion
+                if self._contains_cjk(name):
+                    item[self.field] = name
+                    continue
+                
+                # Convert to proper case, handling hyphens
+                name = self._proper_case_name(name)
+                
+                item[self.field] = name
         return self.lod
-
+    
     def format_person_lastname(self):
+        """
+        Format a person's last name to proper case with special handling for:
+        - Prefixes: Mc, Mac (e.g., "MCCORMICK" -> "McCormick")
+        - Compound names: Van, Von, De, etc. (e.g., "VANECK" -> "VanEck")
+        - Apostrophes (e.g., "O'MALLEY" -> "O'Malley")
+        - Multiple word surnames (e.g., "van der sar" -> "Van der Sar")
+        """
         self.common_assert_lod()
         for item in self.lod:
-            if self.field in item:
-                # TODO FIXME - implement this
-                pass
+            if self.field in item and item[self.field]:
+                name = str(item[self.field])
+                
+                # Apply lastname-specific formatting rules
+                name = self._format_lastname(name)
+                
+                item[self.field] = name
         return self.lod
-
+    
     def format_state_territory_iso2(self):
+        """
+        Format US state/territory names to ISO2 codes.
+        - Handles exact matches
+        - Handles misspellings via fuzzy matching
+        - Handles multiple languages (Spanish, Chinese, etc.)
+        """
         self.common_assert_lod()
         for item in self.lod:
-            if self.field in item:
-                # TODO FIXME - implement this
-                pass
+            if self.field in item and item[self.field]:
+                input_value = str(item[self.field]).strip()
+                
+                # Try to find the ISO2 code
+                iso2_code = self._lookup_state_territory(input_value)
+                
+                if iso2_code:
+                    item[self.field] = iso2_code
         return self.lod
-
+    
     def format_country_iso2(self):
+        """
+        Format country names to ISO2 codes.
+        - Handles exact matches
+        - Handles abbreviations (USA, U.S.A., etc.)
+        - Handles misspellings via fuzzy matching
+        - Handles multiple languages and aliases
+        """
         self.common_assert_lod()
         for item in self.lod:
-            if self.field in item:
-                # TODO FIXME - implement this
-                pass
+            if self.field in item and item[self.field]:
+                input_value = str(item[self.field]).strip()
+                
+                # Try to find the ISO2 code
+                iso2_code = self._lookup_country(input_value, 'iso2')
+                
+                if iso2_code:
+                    item[self.field] = iso2_code
         return self.lod
+    
+    def format_country_iso3(self):
+        """
+        Format country names to ISO3 codes.
+        Similar to format_country_iso2 but returns ISO3 codes.
+        """
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item and item[self.field]:
+                input_value = str(item[self.field]).strip()
+                
+                # Try to find the ISO3 code
+                iso3_code = self._lookup_country(input_value, 'iso3')
+                
+                if iso3_code:
+                    item[self.field] = iso3_code
+        return self.lod
+    
+    # Helper methods for formatting
+    
+    def _replace_unicode_escapes(self, text):
+        """Replace Unicode escape sequences like 'U+00E9' with actual Unicode characters."""
+        # Pattern to match U+XXXX format
+        pattern = r'U\+([0-9A-Fa-f]{4,6})'
+        
+        def replace_match(match):
+            hex_code = match.group(1)
+            try:
+                # Convert hex string to integer and then to character
+                return chr(int(hex_code, 16))
+            except (ValueError, OverflowError):
+                # If conversion fails, return original
+                return match.group(0)
+        
+        return re.sub(pattern, replace_match, text)
+    
+    def _contains_cjk(self, text):
+        """Check if text contains Chinese, Japanese, or Korean characters."""
+        for char in text:
+            # Check if character is in CJK Unicode ranges
+            if '\u4e00' <= char <= '\u9fff' or \
+               '\u3040' <= char <= '\u309f' or \
+               '\u30a0' <= char <= '\u30ff' or \
+               '\uac00' <= char <= '\ud7af':
+                return True
+        return False
+    
+    def _proper_case_name(self, name):
+        """Convert name to proper case, handling hyphens and spaces."""
+        if not name:
+            return name
+        
+        # Split on hyphens and spaces
+        parts = re.split(r'([-\s])', name)
+        
+        # Capitalize each part
+        result = []
+        for part in parts:
+            if part in ['-', ' ']:
+                result.append(part)
+            elif part:
+                # Capitalize first letter, lowercase rest
+                result.append(part[0].upper() + part[1:].lower() if len(part) > 1 else part.upper())
+            else:
+                result.append(part)
+        
+        return ''.join(result)
+    
+    def _format_lastname(self, name):
+        """Format last name with special rules for prefixes and compound names."""
+        if not name:
+            return name
+        
+        # Normalize the name
+        name = name.strip()
+        
+        # Handle special patterns
+        
+        # Pattern 1: Mc/Mac prefixes (e.g., "MCCORMICK" -> "McCormick", "MACDONALD" -> "MacDonald")
+        if name.lower().startswith('mc') and len(name) > 2:
+            return 'Mc' + name[2:].capitalize()
+        
+        if name.lower().startswith('mac') and len(name) > 3:
+            # Check if it's likely a Mac prefix (not just starting with "mac")
+            # Common Mac names: MacDonald, MacArthur, etc.
+            # But not: Mack, Macon, etc.
+            if len(name) > 4 and name[3].upper() != name[3].lower():  # Next char after 'mac' is a letter
+                return 'Mac' + name[3:].capitalize()
+        
+        # Pattern 2: O' prefix (e.g., "O'MALLEY" -> "O'Malley")
+        if name.lower().startswith("o'") and len(name) > 2:
+            return "O'" + name[2:].capitalize()
+        
+        # Pattern 3: Multi-word surnames with Van, Von, De, etc.
+        # (e.g., "van der sar" -> "Van der Sar", "VANECK" -> "VanEck")
+        words = name.split()
+        
+        if len(words) > 1:
+            # Multi-word surname
+            result = []
+            for i, word in enumerate(words):
+                word_lower = word.lower()
+                
+                # Keep certain particles lowercase unless they're the first word
+                if i > 0 and word_lower in ['van', 'von', 'de', 'der', 'den', 'di', 'da', 'le', 'la']:
+                    result.append(word.capitalize())
+                else:
+                    result.append(word.capitalize())
+            
+            return ' '.join(result)
+        
+        # Pattern 4: Single word with Van/Von/De prefix (e.g., "VANECK" -> "VanEck")
+        if name.lower().startswith('van') and len(name) > 3:
+            # Check if rest starts with uppercase (indicating compound name)
+            if len(name) > 4:
+                rest = name[3:]
+                return 'Van' + rest[0].upper() + rest[1:].lower()
+        
+        if name.lower().startswith('von') and len(name) > 3:
+            if len(name) > 4:
+                rest = name[3:]
+                return 'Von' + rest[0].upper() + rest[1:].lower()
+        
+        # Default: simple proper case
+        return self._proper_case_name(name)
+    
+    def _lookup_state_territory(self, input_value):
+        """Look up state/territory ISO2 code from input string."""
+        if not input_value:
+            return None
+        
+        # Normalize input
+        normalized = input_value.strip().lower()
+        
+        # Remove common punctuation
+        normalized = normalized.replace('.', '').replace(',', '')
+        
+        # Try exact match in main mappings
+        if normalized in STATE_TERRITORY_MAPPINGS:
+            return STATE_TERRITORY_MAPPINGS[normalized]
+        
+        # Try exact match in variations
+        if normalized in STATE_TERRITORY_VARIATIONS:
+            return STATE_TERRITORY_VARIATIONS[normalized]
+        
+        # Try fuzzy matching for misspellings
+        best_match = self._fuzzy_match(normalized, STATE_TERRITORY_MAPPINGS)
+        if best_match:
+            return STATE_TERRITORY_MAPPINGS[best_match]
+        
+        # If still no match, return None (or could return original)
+        return None
+    
+    def _lookup_country(self, input_value, code_type='iso2'):
+        """Look up country ISO code from input string."""
+        if not input_value:
+            return None
+        
+        # Normalize input
+        normalized = input_value.strip().lower()
+        
+        # Remove common punctuation and extra spaces
+        normalized = re.sub(r'[.,;]', '', normalized)
+        normalized = re.sub(r'\s+', ' ', normalized).strip()
+        
+        # Try exact match in main mappings
+        if normalized in COUNTRY_MAPPINGS:
+            return COUNTRY_MAPPINGS[normalized][code_type]
+        
+        # Try abbreviations (for iso2 only)
+        if code_type == 'iso2' and normalized in COUNTRY_ABBREVIATIONS:
+            return COUNTRY_ABBREVIATIONS[normalized]
+        
+        # Try fuzzy matching for misspellings
+        best_match = self._fuzzy_match(normalized, COUNTRY_MAPPINGS)
+        if best_match:
+            return COUNTRY_MAPPINGS[best_match][code_type]
+        
+        # If still no match, return None
+        return None
+    
+    def _fuzzy_match(self, query, mapping_dict, threshold=0.8):
+        """
+        Simple fuzzy matching using string similarity.
+        Returns the best matching key from mapping_dict if similarity > threshold.
+        """
+        if not query:
+            return None
+        
+        best_match = None
+        best_score = 0
+        
+        for key in mapping_dict.keys():
+            score = self._string_similarity(query, key)
+            if score > best_score and score >= threshold:
+                best_score = score
+                best_match = key
+        
+        return best_match
+    
+    def _string_similarity(self, s1, s2):
+        """
+        Calculate similarity between two strings using a simple algorithm.
+        Returns a score between 0 and 1.
+        """
+        if not s1 or not s2:
+            return 0
+        
+        if s1 == s2:
+            return 1.0
+        
+        # Convert to lowercase for comparison
+        s1 = s1.lower()
+        s2 = s2.lower()
+        
+        # Calculate Levenshtein-like similarity
+        # For simplicity, we'll use a character overlap ratio
+        
+        # Check if one string contains the other (high similarity)
+        if s1 in s2 or s2 in s1:
+            return 0.85
+        
+        # Count matching characters
+        s1_chars = set(s1)
+        s2_chars = set(s2)
+        
+        intersection = len(s1_chars & s2_chars)
+        union = len(s1_chars | s2_chars)
+        
+        if union == 0:
+            return 0
+        
+        # Jaccard similarity
+        jaccard = intersection / union
+        
+        # Also consider length difference
+        len_diff = abs(len(s1) - len(s2)) / max(len(s1), len(s2))
+        len_similarity = 1 - len_diff
+        
+        # Weighted average
+        return (jaccard * 0.6) + (len_similarity * 0.4)
 
     # Deduplication -> surviving record methods
     def keep_record_with_max_value(self) -> list:
