@@ -50,8 +50,7 @@ METHODS_BY_OPERATOR_TYPE = {
     'format_value': [
         'format_person_firstname',
         'format_person_lastname',
-        'format_company_name',
-        'format_state_territory',
+        'format_state_territory_is02',
         'format_country_iso2',
     ],
 }
@@ -85,8 +84,7 @@ METHODS_BY_FIELD_TYPE = {
         'matches',
         'format_person_firstname',
         'format_person_lastname',
-        'format_company_name',
-        'format_state_territory',
+        'format_state_territory_is02',
         'format_country_iso2',
     ],
     'email': [
@@ -375,15 +373,7 @@ class DataOperator:
                 pass
         return self.lod
 
-    def format_company_name(self):
-        self.common_assert_lod()
-        for item in self.lod:
-            if self.field in item:
-                # TODO FIXME - implement this
-                pass
-        return self.lod
-
-    def format_state_territory(self):
+    def format_state_territory_iso2(self):
         self.common_assert_lod()
         for item in self.lod:
             if self.field in item:
