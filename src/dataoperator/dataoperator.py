@@ -47,6 +47,10 @@ METHODS_BY_OPERATOR_TYPE = {
     'match_condition': [
         'matches',
     ],
+    'enrich_company_field': [
+        'update_if_blank',
+        'overwrite',
+    ],
 }
 
 METHODS_BY_FIELD_TYPE = {
@@ -76,6 +80,8 @@ METHODS_BY_FIELD_TYPE = {
         'append_string',
         'prepend_string',
         'matches',
+        'update_if_blank',
+        'overwrite',
     ],
     'email': [
         'equals',
@@ -97,6 +103,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'concatenate_all_values',
         'set_string',
+        'update_if_blank',
+        'overwrite',
     ],
     'multipicklist': [
         'contains',
@@ -115,6 +123,8 @@ METHODS_BY_FIELD_TYPE = {
         'preserve_priority',
         'set_string',
         'matches',
+        'update_if_blank',
+        'overwrite',
     ],
     'int': [
         # 'equals',
@@ -129,6 +139,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_record_with_min_value',
         # 'increment',
         # 'decrement',
+        'update_if_blank',
+        'overwrite',
     ],
     'date': [
         'keep_newest_value',
@@ -144,6 +156,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_newest_value',
         'keep_oldest_value',
         'matches',
+        'update_if_blank',
+        'overwrite',
     ],
     'url': [
         'equals',
@@ -153,6 +167,8 @@ METHODS_BY_FIELD_TYPE = {
         'keep_newest_value',
         'keep_oldest_value',
         'matches',
+        'update_if_blank',
+        'overwrite',
     ],
 }
 
@@ -492,3 +508,27 @@ class DataOperator:
             if d[self.field].split("@")[1] not in FREE_EMAIL_DOMAINS 
             and d[self.field].split("@")[1] not in DISPOSABLE_EMAIL_DOMAINS
             ][0]
+
+    # Enrichment methods
+    def update_if_blank(self):
+        """
+        Update field with value only if the field is blank (None or empty string).
+        Used for enrichment operations where we don't want to overwrite existing data.
+        """
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                if item[self.field] in ['', None]:
+                    item[self.field] = self.value
+        return self.lod
+
+    def overwrite(self):
+        """
+        Overwrite field with value regardless of existing value.
+        Used for enrichment operations where we want to replace all values.
+        """
+        self.common_assert_lod()
+        for item in self.lod:
+            if self.field in item:
+                item[self.field] = self.value
+        return self.lod
