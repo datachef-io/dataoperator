@@ -1402,11 +1402,11 @@ class TestDataOperator(unittest.TestCase):
             lod=lod,
             field="description",
             operator="update_if_blank",
-            value="No description available"
+            value="New description"
         )
         result = operator.execute()
-        self.assertEqual(result[0]["description"], "No description available")
-        self.assertEqual(result[1]["description"], "No description available")
+        self.assertEqual(result[0]["description"], "New description")
+        self.assertEqual(result[1]["description"], "New description")
         self.assertEqual(result[2]["description"], "Existing description")
 
     def test_update_if_blank_int_field(self):
@@ -1447,14 +1447,14 @@ class TestDataOperator(unittest.TestCase):
         result = operator.execute()
         self.assertEqual(result[0]["industry"], "Technology")
         self.assertEqual(result[1]["industry"], "Technology")
-        self.assertEqual(result[2]["industry"], "Healthcare")
+        self.assertEqual(result[2]["industry"], "Healthcare") # Should not change
 
     def test_update_if_blank_phone_field(self):
         """Test update_if_blank with phone field type"""
         lod = [
             {"company": "Acme Corp", "phone": ""},
             {"company": "Beta Inc", "phone": None},
-            {"company": "Gamma LLC", "phone": "+1-555-123-4567"}
+            {"company": "Gamma LLC", "phone": "+1-555-111-1111"}
         ]
         operator = DataOperator(
             field_type="phone",
@@ -1467,7 +1467,7 @@ class TestDataOperator(unittest.TestCase):
         result = operator.execute()
         self.assertEqual(result[0]["phone"], "+1-555-000-0000")
         self.assertEqual(result[1]["phone"], "+1-555-000-0000")
-        self.assertEqual(result[2]["phone"], "+1-555-123-4567")
+        self.assertEqual(result[2]["phone"], "+1-555-111-1111") # Should not change
 
     def test_update_if_blank_url_field(self):
         """Test update_if_blank with url field type"""
@@ -1482,11 +1482,11 @@ class TestDataOperator(unittest.TestCase):
             lod=lod,
             field="website",
             operator="update_if_blank",
-            value="https://unknown.com"
+            value="https://new.com"
         )
         result = operator.execute()
-        self.assertEqual(result[0]["website"], "https://unknown.com")
-        self.assertEqual(result[1]["website"], "https://unknown.com")
+        self.assertEqual(result[0]["website"], "https://new.com")
+        self.assertEqual(result[1]["website"], "https://new.com")
         self.assertEqual(result[2]["website"], "https://gamma.com")
 
     def test_overwrite_string_all_values(self):
