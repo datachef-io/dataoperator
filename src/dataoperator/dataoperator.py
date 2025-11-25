@@ -19,8 +19,8 @@ METHODS_BY_OPERATOR_TYPE = {
         'set_false',
         'append_string',
         'prepend_string',
-        # 'increment',
-        # 'decrement',
+        'update_if_blank',
+        'overwrite',
     ],
     'merge_values': [
         'keep_true_value',
@@ -46,10 +46,6 @@ METHODS_BY_OPERATOR_TYPE = {
     ],
     'match_condition': [
         'matches',
-    ],
-    'enrich_company_field': [
-        'update_if_blank',
-        'overwrite',
     ],
 }
 
@@ -234,9 +230,12 @@ class DataOperator:
         if self.lod and self.operator_type == "evaluate_condition":
             assert len(self.lod) == 1, "evaluate_condition operations require exactly one record in lod"
 
-        if self.operator in ('set_true', 'set_false'):
+        if self.lod and self.operator in ('set_true', 'set_false'):
             assert self.field_type == "boolean", f"{self.operator} can only be used when field_type = boolean"
             assert self.value is None, "value cannot be provided when using set_true or set_false operators"
+
+        if self.lod and self.operator in ('update_if_blank', 'overwrite'):
+            assert self.value, "value must be provided when using update_if_blank or overwrite operators"
 
         if self.operator:
             # assert self.field, "'field' is a required kwarg when 'operator' is provided"
@@ -509,11 +508,9 @@ class DataOperator:
             and d[self.field].split("@")[1] not in DISPOSABLE_EMAIL_DOMAINS
             ][0]
 
-    # Enrichment methods
     def update_if_blank(self):
         """
         Update field with value only if the field is blank (None or empty string).
-        Used for enrichment operations where we don't want to overwrite existing data.
         """
         self.common_assert_lod()
         for item in self.lod:
@@ -525,7 +522,6 @@ class DataOperator:
     def overwrite(self):
         """
         Overwrite field with value regardless of existing value.
-        Used for enrichment operations where we want to replace all values.
         """
         self.common_assert_lod()
         for item in self.lod:

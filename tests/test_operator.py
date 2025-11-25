@@ -1228,142 +1228,148 @@ class TestDataOperator(unittest.TestCase):
         # Verify the operator can be initialized with match_condition
         self.assertEqual(operator.operator_type, "match_condition")
 
-    # Test enrich_company_field operator type
-    def test_enrich_company_field_init_valid_string(self):
-        """Test valid initialization of enrich_company_field with string field type"""
-        lod = [{"company": "Acme Corp", "industry": ""}]
+    # Test update_field operator type
+    def test_update_field_init_valid_string(self):
+        """Test valid initialization of update_field with string field type"""
+        lod = [{"company": "Acme Corp", "industry": "x"}]
         operator = DataOperator(
             field_type="string",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
-            operator="update_if_blank"
+            operator="update_if_blank",
+            value="y"
         )
         self.assertEqual(operator.field_type, "string")
-        self.assertEqual(operator.operator_type, "enrich_company_field")
+        self.assertEqual(operator.operator_type, "update_field")
         self.assertEqual(operator.operator, "update_if_blank")
 
-    def test_enrich_company_field_init_valid_text(self):
-        """Test valid initialization of enrich_company_field with text field type"""
+    def test_update_field_init_valid_text(self):
+        """Test valid initialization of update_field with text field type"""
         lod = [{"company": "Acme Corp", "description": ""}]
         operator = DataOperator(
             field_type="text",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="description",
-            operator="overwrite"
+            operator="overwrite",
+            value="x"
         )
         self.assertEqual(operator.field_type, "text")
-        self.assertEqual(operator.operator_type, "enrich_company_field")
+        self.assertEqual(operator.operator_type, "update_field")
         self.assertEqual(operator.operator, "overwrite")
 
-    def test_enrich_company_field_init_valid_int(self):
-        """Test valid initialization of enrich_company_field with int field type"""
+    def test_update_field_init_valid_int(self):
+        """Test valid initialization of update_field with int field type"""
         lod = [{"company": "Acme Corp", "numberofemployees": None}]
         operator = DataOperator(
             field_type="int",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="numberofemployees",
-            operator="update_if_blank"
+            operator="update_if_blank",
+            value=123
         )
         self.assertEqual(operator.field_type, "int")
-        self.assertEqual(operator.operator_type, "enrich_company_field")
+        self.assertEqual(operator.operator_type, "update_field")
 
-    def test_enrich_company_field_init_valid_picklist(self):
-        """Test valid initialization of enrich_company_field with picklist field type"""
+    def test_update_field_init_valid_picklist(self):
+        """Test valid initialization of update_field with picklist field type"""
         lod = [{"company": "Acme Corp", "industry": ""}]
         operator = DataOperator(
             field_type="picklist",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
-            operator="update_if_blank"
+            operator="update_if_blank",
+            value="x"
         )
         self.assertEqual(operator.field_type, "picklist")
-        self.assertEqual(operator.operator_type, "enrich_company_field")
+        self.assertEqual(operator.operator_type, "update_field")
 
-    def test_enrich_company_field_init_valid_phone(self):
-        """Test valid initialization of enrich_company_field with phone field type"""
+    def test_update_field_init_valid_phone(self):
+        """Test valid initialization of update_field with phone field type"""
         lod = [{"company": "Acme Corp", "phone": ""}]
         operator = DataOperator(
             field_type="phone",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="phone",
-            operator="overwrite"
+            operator="overwrite",
+            value="x"
         )
         self.assertEqual(operator.field_type, "phone")
-        self.assertEqual(operator.operator_type, "enrich_company_field")
+        self.assertEqual(operator.operator_type, "update_field")
 
-    def test_enrich_company_field_init_valid_url(self):
-        """Test valid initialization of enrich_company_field with url field type"""
-        lod = [{"company": "Acme Corp", "website": ""}]
+    def test_update_field_init_valid_url(self):
+        """Test valid initialization of update_field with url field type"""
+        lod = [{"company": "Acme Corp", "website": "x"}]
         operator = DataOperator(
             field_type="url",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="website",
-            operator="update_if_blank"
+            operator="update_if_blank",
+            value="y"
         )
         self.assertEqual(operator.field_type, "url")
-        self.assertEqual(operator.operator_type, "enrich_company_field")
+        self.assertEqual(operator.operator_type, "update_field")
 
-    def test_get_methods_enrich_company_field_string(self):
-        """Test get_methods returns expected values for enrich_company_field with string"""
+    def test_get_methods_update_field_string(self):
+        """Test get_methods returns expected values for update_field with string"""
         operator = DataOperator(
             field_type="string",
-            operator_type="enrich_company_field"
+            operator_type="update_field"
         )
         returned_methods = operator.get_methods()
         self.assertIn('update_if_blank', returned_methods)
         self.assertIn('overwrite', returned_methods)
 
-    def test_get_methods_enrich_company_field_text(self):
-        """Test get_methods returns expected values for enrich_company_field with text"""
+    def test_get_methods_update_field_text(self):
+        """Test get_methods returns expected values for update_field with text"""
         operator = DataOperator(
             field_type="text",
-            operator_type="enrich_company_field"
+            operator_type="update_field"
         )
         returned_methods = operator.get_methods()
         self.assertIn('update_if_blank', returned_methods)
         self.assertIn('overwrite', returned_methods)
 
-    def test_get_methods_enrich_company_field_int(self):
-        """Test get_methods returns expected values for enrich_company_field with int"""
+    def test_get_methods_update_field_int(self):
+        """Test get_methods returns expected values for update_field with int"""
         operator = DataOperator(
             field_type="int",
-            operator_type="enrich_company_field"
+            operator_type="update_field"
         )
         returned_methods = operator.get_methods()
         self.assertIn('update_if_blank', returned_methods)
         self.assertIn('overwrite', returned_methods)
 
-    def test_get_methods_enrich_company_field_picklist(self):
-        """Test get_methods returns expected values for enrich_company_field with picklist"""
+    def test_get_methods_update_field_picklist(self):
+        """Test get_methods returns expected values for update_field with picklist"""
         operator = DataOperator(
             field_type="picklist",
-            operator_type="enrich_company_field"
+            operator_type="update_field"
         )
         returned_methods = operator.get_methods()
         self.assertIn('update_if_blank', returned_methods)
         self.assertIn('overwrite', returned_methods)
 
-    def test_get_methods_enrich_company_field_phone(self):
-        """Test get_methods returns expected values for enrich_company_field with phone"""
+    def test_get_methods_update_field_phone(self):
+        """Test get_methods returns expected values for update_field with phone"""
         operator = DataOperator(
             field_type="phone",
-            operator_type="enrich_company_field"
+            operator_type="update_field"
         )
         returned_methods = operator.get_methods()
         self.assertIn('update_if_blank', returned_methods)
         self.assertIn('overwrite', returned_methods)
 
-    def test_get_methods_enrich_company_field_url(self):
-        """Test get_methods returns expected values for enrich_company_field with url"""
+    def test_get_methods_update_field_url(self):
+        """Test get_methods returns expected values for update_field with url"""
         operator = DataOperator(
             field_type="url",
-            operator_type="enrich_company_field"
+            operator_type="update_field"
         )
         returned_methods = operator.get_methods()
         self.assertIn('update_if_blank', returned_methods)
@@ -1378,7 +1384,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="string",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
             operator="update_if_blank",
@@ -1398,7 +1404,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="text",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="description",
             operator="update_if_blank",
@@ -1418,7 +1424,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="int",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="numberofemployees",
             operator="update_if_blank",
@@ -1438,7 +1444,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="picklist",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
             operator="update_if_blank",
@@ -1458,7 +1464,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="phone",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="phone",
             operator="update_if_blank",
@@ -1478,7 +1484,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="url",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="website",
             operator="update_if_blank",
@@ -1498,7 +1504,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="string",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
             operator="overwrite",
@@ -1517,7 +1523,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="text",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="description",
             operator="overwrite",
@@ -1535,7 +1541,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="int",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="numberofemployees",
             operator="overwrite",
@@ -1553,7 +1559,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="picklist",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
             operator="overwrite",
@@ -1571,7 +1577,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="phone",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="phone",
             operator="overwrite",
@@ -1589,7 +1595,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="url",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="website",
             operator="overwrite",
@@ -1608,7 +1614,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="string",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
             operator="update_if_blank",
@@ -1628,7 +1634,7 @@ class TestDataOperator(unittest.TestCase):
         ]
         operator = DataOperator(
             field_type="string",
-            operator_type="enrich_company_field",
+            operator_type="update_field",
             lod=lod,
             field="industry",
             operator="update_if_blank",
