@@ -142,6 +142,25 @@ class TestDataOperator(unittest.TestCase):
         self.assertEqual(operator.field_type, "string") # mapped from "address"
         self.assertEqual(operator.operator_type, "merge_values")
 
+    def test_init_valid_lead_function_field_type(self):
+        """Test valid initialization with lead_function field type from Marketo"""
+        lod = [
+            {"name": "John", "score": "85"},
+            {"name": "Jane", "score": "92"}
+        ]
+        operator = DataOperator(
+            field_type="lead_function", 
+            operator_type="merge_values", 
+            lod=lod, 
+            field="score", 
+            operator="keep_newest_value"
+        )
+        self.assertEqual(operator.lod, lod)
+        self.assertEqual(operator.field, "score")
+        self.assertEqual(operator.operator, "keep_newest_value")
+        self.assertEqual(operator.field_type, "string") # mapped from "lead_function"
+        self.assertEqual(operator.operator_type, "merge_values")
+
     def test_init_with_all_fields(self):
         op = DataOperator(
             field_type="string",

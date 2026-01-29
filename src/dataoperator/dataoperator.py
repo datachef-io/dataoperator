@@ -180,6 +180,7 @@ FIELD_TYPE_MAP = {
     'combobox': 'string',
     'datetime': 'date',
     'textarea': 'text',
+    'lead_function': 'string',
 }
 
 
