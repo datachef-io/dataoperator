@@ -181,6 +181,7 @@ FIELD_TYPE_MAP = {
     'datetime': 'date',
     'textarea': 'text',
     'tag_list': 'picklist',
+    'object': 'text',
 }
 
 
