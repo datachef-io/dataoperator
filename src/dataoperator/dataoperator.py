@@ -182,7 +182,7 @@ FIELD_TYPE_MAP = {
     'textarea': 'text',
     'tag_list': 'picklist', # TODO FIXME - this is a simplification for now; ultimately we should have a separate field type for handling lists of values, but in the meantime we can treat them as picklists and use a delimiter (e.g. "|") to separate values in the string
     'object': 'text', # TODO FIXME - this is a band-aid for now; ultimately we should have more specific field types and operators for handling nested objects, but in the meantime we can treat them as text and use JSON strings as the format for storing them
-}
+    'lead_function': 'string', # specific to Marketo; this is a formula field that can reference other fields in the same record, but ultimately it returns string values
 
 
 class DataOperator:
