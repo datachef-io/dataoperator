@@ -109,10 +109,6 @@ METHODS_BY_FIELD_TYPE = {
         'keep_oldest_value',
         'concatenate_all_values',
     ],
-    'array': [
-        'contains',
-        'not_contains',
-    ],
     'picklist': [
         'equals',
         'not_equals',
@@ -184,7 +180,7 @@ FIELD_TYPE_MAP = {
     'combobox': 'string',
     'datetime': 'date',
     'textarea': 'text',
-    'tag_list': 'array',
+    'tag_list': 'picklist',
 }
 
 
